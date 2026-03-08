@@ -58,33 +58,57 @@ export const DataProvider = ({ children }) => {
     const [data, setData] = useState(defaultContextValue.data);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        // Always resolve loading, even on error
-        const init = async () => {
-            // Load local data first (cards/goals/budget/user/notifications)
-            const saved = localStorage.getItem('finance_db');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    setData(prev => ({ ...prev, ...parsed }));
-                } catch (e) { /* ignore */ }
+    // Always resolve loading, even on error
+    const init = async () => {
+        // Handle OAuth redirect fragment (#access_token=...)
+        const hash = window.location.hash;
+        if (hash && hash.includes('access_token=')) {
+            const params = new URLSearchParams(hash.substring(1));
+            const token = params.get('access_token');
+            if (token) {
+                localStorage.setItem('sb-token', token);
+                document.cookie = `sb-token=${token}; path=/; max-age=3600; SameSite=Lax`;
+                // Clear the hash for a clean URL
+                window.history.replaceState(null, null, window.location.pathname);
             }
+        }
 
-            // Try to load transactions from Supabase
-            if (SUPABASE_URL && SUPABASE_KEY) {
-                try {
-                    const txData = await supabaseFetch('transactions?select=*&order=date.desc');
-                    if (txData && txData.length > 0) {
-                        setData(prev => ({ ...prev, transactions: txData }));
-                    }
-                } catch (err) {
-                    console.warn('Supabase transactions fetch failed:', err.message);
+        const token = localStorage.getItem('sb-token');
+
+        // Load local data first (cards/goals/budget/user/notifications)
+        const saved = localStorage.getItem('finance_db');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                setData(prev => ({ ...prev, ...parsed }));
+            } catch (e) { /* ignore */ }
+        }
+
+        // Try to load transactions from Supabase with user token
+        if (SUPABASE_URL && SUPABASE_KEY && token) {
+            try {
+                const txData = await supabaseFetch('transactions?select=*&order=date.desc', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (txData) {
+                    setData(prev => ({ ...prev, transactions: txData }));
                 }
+            } catch (err) {
+                console.warn('Supabase transactions fetch failed:', err.message);
+                if (err.message.includes('401')) logout();
             }
+        }
 
-            setIsLoading(false);
-        };
+        setIsLoading(false);
+    };
 
+    const logout = () => {
+        localStorage.removeItem('sb-token');
+        document.cookie = "sb-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        window.location.href = '/login';
+    };
+
+    useEffect(() => {
         init();
     }, []);
 
@@ -97,12 +121,14 @@ export const DataProvider = ({ children }) => {
     }, [data, isLoading]);
 
     const addTransaction = async (tx) => {
+        const token = localStorage.getItem('sb-token');
         const newTx = { ...tx, id: uuidv4() };
         setData(prev => ({ ...prev, transactions: [newTx, ...prev.transactions] }));
-        if (SUPABASE_URL && SUPABASE_KEY) {
+        if (SUPABASE_URL && SUPABASE_KEY && token) {
             try {
                 await supabaseFetch('transactions', {
                     method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(newTx)
                 });
             } catch (err) {
@@ -112,20 +138,26 @@ export const DataProvider = ({ children }) => {
     };
 
     const deleteTransaction = async (id) => {
+        const token = localStorage.getItem('sb-token');
         setData(prev => ({ ...prev, transactions: prev.transactions.filter(t => t.id !== id) }));
-        if (SUPABASE_URL && SUPABASE_KEY) {
+        if (SUPABASE_URL && SUPABASE_KEY && token) {
             try {
-                await supabaseFetch(`transactions?id=eq.${id}`, { method: 'DELETE' });
+                await supabaseFetch(`transactions?id=eq.${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
             } catch (err) { console.error('Delete error:', err.message); }
         }
     };
 
     const editTransaction = async (updatedTx) => {
+        const token = localStorage.getItem('sb-token');
         setData(prev => ({ ...prev, transactions: prev.transactions.map(t => t.id === updatedTx.id ? { ...t, ...updatedTx } : t) }));
-        if (SUPABASE_URL && SUPABASE_KEY) {
+        if (SUPABASE_URL && SUPABASE_KEY && token) {
             try {
                 await supabaseFetch(`transactions?id=eq.${updatedTx.id}`, {
                     method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(updatedTx)
                 });
             } catch (err) { console.error('Update error:', err.message); }
@@ -150,7 +182,8 @@ export const DataProvider = ({ children }) => {
             addCard, deleteCard,
             addGoal, updateGoal, deleteGoal,
             updateBudget, updateUser,
-            markNotificationRead, clearAllNotifications, resetData
+            markNotificationRead, clearAllNotifications, resetData,
+            logout
         }}>
             {children}
         </DataContext.Provider>

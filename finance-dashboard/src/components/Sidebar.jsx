@@ -6,7 +6,7 @@ import { LayoutDashboard, ArrowRightLeft, Wallet, Target, PieChart, FileText } f
 import { useData } from '../context/DataContext';
 
 const Sidebar = () => {
-    const { data, isLoading } = useData();
+    const { data, isLoading, logout } = useData();
     const pathname = usePathname();
 
     const user = data?.user;
@@ -54,7 +54,7 @@ const Sidebar = () => {
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent'
                 }}>
-                    RP Solutionss
+                    RP Software Ltd.
                 </h2>
             </div>
 
@@ -108,13 +108,29 @@ const Sidebar = () => {
                         color: 'white',
                         boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
                     }}>
-                        {user ? getInitials(user.name) : 'JD'}
+                        {user ? getInitials(user.name) : 'RP'}
                     </div>
                     <div>
                         <div style={{ fontSize: '14px', fontWeight: 600, color: 'white' }}>
                             {user ? user.name : 'Loading...'}
                         </div>
-                        <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>View Profile</div>
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>View Profile</div>
+                            <button
+                                onClick={logout}
+                                style={{
+                                    fontSize: '11px',
+                                    color: '#EF4444',
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: 0,
+                                    cursor: 'pointer',
+                                    fontWeight: 600
+                                }}
+                            >
+                                Logout
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
