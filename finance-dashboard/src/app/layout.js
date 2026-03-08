@@ -2,6 +2,7 @@ import "@/styles/index.css";
 import ClientProviders from '@/components/ClientProviders';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata = {
     title: 'Finance Dashboard',
@@ -22,6 +23,7 @@ export default function RootLayout({ children }) {
                             </main>
                         </div>
                     </div>
+                    <SpeedInsights />
                 </ClientProviders>
             </body>
         </html>
