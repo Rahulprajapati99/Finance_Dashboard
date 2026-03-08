@@ -2,6 +2,7 @@ import "@/styles/index.css";
 import ClientProviders from '@/components/ClientProviders';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata = {
     title: 'Finance Dashboard',
@@ -23,6 +24,7 @@ export default function RootLayout({ children }) {
                         </div>
                     </div>
                 </ClientProviders>
+                <Analytics />
             </body>
         </html>
     );
