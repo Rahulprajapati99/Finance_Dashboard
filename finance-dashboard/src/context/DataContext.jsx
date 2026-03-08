@@ -5,6 +5,10 @@ import { v4 as uuidv4 } from 'uuid';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+console.log('Environment Debug - URL present:', !!SUPABASE_URL);
+console.log('Environment Debug - Key present:', !!SUPABASE_KEY);
+if (SUPABASE_KEY) console.log('Environment Debug - Key starts with:', SUPABASE_KEY.substring(0, 10));
+
 // SSR-safe default prevents crash during Next.js prerendering
 const defaultContextValue = {
     data: {
