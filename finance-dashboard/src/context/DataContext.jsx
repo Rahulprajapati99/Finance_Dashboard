@@ -49,6 +49,7 @@ async function supabaseFetch(path, options = {}) {
     });
     if (!res.ok) {
         const text = await res.text();
+        console.error(`Supabase Fetch Error ${res.status}:`, text);
         throw new Error(`Supabase error ${res.status}: ${text}`);
     }
     return res.status === 204 ? null : res.json();
@@ -101,8 +102,9 @@ export const DataProvider = ({ children }) => {
                     setData(prev => ({ ...prev, transactions: txData }));
                 }
             } catch (err) {
-                console.warn('Supabase transactions fetch failed:', err.message);
-                if (err.message.includes('401')) logout();
+                console.error('Transactions fetch failed. This usually indicates an API key or RLS policy issue:', err);
+                // Temporarily disabled auto-logout to stop the redirect loop so we can debug
+                // if (err.message.includes('401')) logout();
             }
         }
 
