@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* RP Solutionss Brand Colors */
+  --color-primary: #2E3A8C;
+  /* RP Dark Blue */
+  --color-secondary: #4A5FD9;
+  /* RP Light Blue */
+  --color-navy: #1A2254;
+  /* RP Navy */
+  --color-white: #FFFFFF;
+  --color-bg-light: #F8FAFC;
+  /* Light Gray/Blue tint */
+  --color-text-main: #1A1A1A;
+  /* Black */
+  --color-text-body: #4A4A4A;
+  /* Dark Gray */
+  --color-border: #E2E8F0;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  --gradient-surface: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+  --gradient-card: linear-gradient(145deg, #FFFFFF, #F1F5F9);
+
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Modern Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05);
+
+  /* Dark Theme Overrides */
+  &[data-theme='dark'] {
+    --color-bg-light: #0F172A;
+    /* Dark Slate */
+    --color-text-main: #F8FAFC;
+    /* White/Light Gray */
+    --color-text-body: #94A3B8;
+    /* Slate Gray */
+    --color-border: #1E293B;
+    /* Darker Border */
+    --color-white: #1E293B;
+    /* Card Background in Dark Mode */
+
+    --gradient-surface: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
+    --gradient-card: linear-gradient(145deg, #1E293B, #0F172A);
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-bg-light);
+  color: var(--color-text-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--color-text-main);
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Enhanced Button Styles */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Utility Classes for Glassmorphism & Aesthetics */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
