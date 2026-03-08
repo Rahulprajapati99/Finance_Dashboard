@@ -1,0 +1,40 @@
+# Vercel Speed Insights Integration
+
+## Summary
+Successfully installed and configured Vercel Speed Insights for the Next.js Finance Dashboard application.
+
+## Changes Made
+
+### 1. Package Installation
+- Installed `@vercel/speed-insights` version 1.3.1
+- Updated package.json with the new dependency
+- Updated package-lock.json with resolved dependencies
+
+### 2. Root Layout Integration (src/app/layout.js)
+- Added import statement: `import { SpeedInsights } from '@vercel/speed-insights/next'`
+- Added `<SpeedInsights />` component inside the `<body>` tag, after the main layout div
+- Placed within the ClientProviders wrapper for proper client-side functionality
+
+## Implementation Details
+
+Since this project uses Next.js 16.1.6 with App Router, I used the recommended approach:
+- Imported from `@vercel/speed-insights/next` (automatic route tracking)
+- Added the component to the root layout (src/app/layout.js)
+- No additional configuration needed - the component automatically tracks page navigation
+
+## Verification
+
+✅ Build completed successfully with no errors
+✅ No lint errors introduced in the layout file
+✅ All pages continue to render correctly (11 routes verified during build)
+✅ Package-lock.json updated with exact dependency versions
+
+## Files Modified
+- `package.json` - Added @vercel/speed-insights dependency
+- `package-lock.json` - Updated with new package and its dependencies  
+- `src/app/layout.js` - Added SpeedInsights import and component
+
+## Notes
+- The SpeedInsights component is placed inside the ClientProviders wrapper to ensure it has access to client-side context
+- The component will automatically track page views and performance metrics when deployed to Vercel
+- No additional configuration is required; Speed Insights will work out of the box on Vercel deployments
