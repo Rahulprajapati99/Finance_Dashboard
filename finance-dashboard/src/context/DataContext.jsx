@@ -5,10 +5,6 @@ import { v4 as uuidv4 } from 'uuid';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-console.log('Environment Debug - URL present:', !!SUPABASE_URL);
-console.log('Environment Debug - Key present:', !!SUPABASE_KEY);
-if (SUPABASE_KEY) console.log('Environment Debug - Key starts with:', SUPABASE_KEY.substring(0, 10));
-
 // SSR-safe default prevents crash during Next.js prerendering
 const defaultContextValue = {
     data: {
@@ -41,19 +37,19 @@ export const useData = () => useContext(DataContext);
 
 // Helper: use fetch directly instead of supabase-js to avoid init issues
 async function supabaseFetch(path, options = {}) {
+    const { headers: customHeaders, ...restOptions } = options;
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
         headers: {
             'apikey': SUPABASE_KEY,
             'Authorization': `Bearer ${SUPABASE_KEY}`,
             'Content-Type': 'application/json',
             'Prefer': 'return=representation',
-            ...options.headers
+            ...customHeaders
         },
-        ...options
+        ...restOptions
     });
     if (!res.ok) {
         const text = await res.text();
-        console.error(`Supabase Fetch Error ${res.status}:`, text);
         throw new Error(`Supabase error ${res.status}: ${text}`);
     }
     return res.status === 204 ? null : res.json();
@@ -106,9 +102,8 @@ export const DataProvider = ({ children }) => {
                     setData(prev => ({ ...prev, transactions: txData }));
                 }
             } catch (err) {
-                console.error('Transactions fetch failed. This usually indicates an API key or RLS policy issue:', err);
-                // Temporarily disabled auto-logout to stop the redirect loop so we can debug
-                // if (err.message.includes('401')) logout();
+                console.warn('Supabase transactions fetch failed:', err.message);
+                if (err.message.includes('401')) logout();
             }
         }
 
