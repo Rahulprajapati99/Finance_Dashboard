@@ -70,6 +70,13 @@ export const DataProvider = ({ children }) => {
                 document.cookie = `sb-token=${token}; path=/; max-age=3600; SameSite=Lax`;
                 // Clear the hash for a clean URL
                 window.history.replaceState(null, null, window.location.pathname);
+
+                // Next.js middleware redirects back to /login when token is in hash
+                // Once we save the token, we need to manually redirect to the dashboard
+                if (window.location.pathname === '/login') {
+                    window.location.href = '/';
+                    return;
+                }
             }
         }
 
