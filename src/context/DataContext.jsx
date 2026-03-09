@@ -55,30 +55,66 @@ export const DataProvider = ({ children }) => {
                 setData(initialData);
             }
         } else {
-            // Seed with sample data
+            // Seed with more realistic sample data over multiple months
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+
+            // Helper to generate dates in previous months
+            const getDateInMonth = (monthsAgo, day = 15) => {
+                const d = new Date(currentYear, currentMonth - monthsAgo, day);
+                return d.toISOString();
+            };
+
             const initialData = {
-                user: { id: 'u1', name: 'Rahul P', monthlySpendingLimit: 3000 },
+                user: { id: 'u1', name: 'Rahul P', monthlySpendingLimit: 5000 },
                 transactions: [
-                    { id: uuidv4(), type: 'income', amount: 5000, category: 'Salary', recipientName: 'Tech Corp', status: 'completed', date: new Date().toISOString(), notes: 'Monthly Salary' },
+                    // Current Month
+                    { id: uuidv4(), type: 'income', amount: 6500, category: 'Salary', recipientName: 'Tech Corp', status: 'completed', date: getDateInMonth(0, 1), notes: 'Monthly Salary' },
                     { id: uuidv4(), type: 'expense', amount: 150, category: 'Food & Grocery', recipientName: 'Whole Foods', status: 'completed', date: new Date(Date.now() - 86400000).toISOString(), notes: 'Weekly groceries' },
                     { id: uuidv4(), type: 'expense', amount: 45, category: 'Transport', recipientName: 'Uber', status: 'completed', date: new Date(Date.now() - 172800000).toISOString(), notes: 'Ride home' },
-                    { id: uuidv4(), type: 'expense', amount: 1200, category: 'Bills & Utilities', recipientName: 'Landlord', status: 'completed', date: new Date(Date.now() - 259200000).toISOString(), notes: 'Rent' },
+                    { id: uuidv4(), type: 'expense', amount: 1800, category: 'Bills & Utilities', recipientName: 'Landlord', status: 'completed', date: getDateInMonth(0, 1), notes: 'Rent' },
+                    { id: uuidv4(), type: 'expense', amount: 200, category: 'Entertainment', recipientName: 'Netflix & Spotify', status: 'completed', date: getDateInMonth(0, 5), notes: 'Subscriptions' },
+
+                    // 1 Month Ago
+                    { id: uuidv4(), type: 'income', amount: 6500, category: 'Salary', recipientName: 'Tech Corp', status: 'completed', date: getDateInMonth(1, 1), notes: 'Monthly Salary' },
+                    { id: uuidv4(), type: 'income', amount: 500, category: 'Freelance', recipientName: 'Design Client', status: 'completed', date: getDateInMonth(1, 15), notes: 'Logo design' },
+                    { id: uuidv4(), type: 'expense', amount: 1800, category: 'Bills & Utilities', recipientName: 'Landlord', status: 'completed', date: getDateInMonth(1, 1), notes: 'Rent' },
+                    { id: uuidv4(), type: 'expense', amount: 450, category: 'Food & Grocery', recipientName: 'Trader Joes', status: 'completed', date: getDateInMonth(1, 10), notes: 'Groceries' },
+                    { id: uuidv4(), type: 'expense', amount: 120, category: 'Transport', recipientName: 'Gas Station', status: 'completed', date: getDateInMonth(1, 12), notes: 'Fuel' },
+                    { id: uuidv4(), type: 'expense', amount: 85, category: 'Healthcare', recipientName: 'Pharmacy', status: 'completed', date: getDateInMonth(1, 20), notes: 'Meds' },
+
+                    // 2 Months Ago
+                    { id: uuidv4(), type: 'income', amount: 6500, category: 'Salary', recipientName: 'Tech Corp', status: 'completed', date: getDateInMonth(2, 1), notes: 'Monthly Salary' },
+                    { id: uuidv4(), type: 'expense', amount: 1800, category: 'Bills & Utilities', recipientName: 'Landlord', status: 'completed', date: getDateInMonth(2, 1), notes: 'Rent' },
+                    { id: uuidv4(), type: 'expense', amount: 380, category: 'Food & Grocery', recipientName: 'Whole Foods', status: 'completed', date: getDateInMonth(2, 8), notes: 'Groceries' },
+                    { id: uuidv4(), type: 'expense', amount: 600, category: 'Travelling', recipientName: 'Delta Airlines', status: 'completed', date: getDateInMonth(2, 15), notes: 'Flights for vacation' },
+                    { id: uuidv4(), type: 'expense', amount: 80, category: 'Entertainment', recipientName: 'AMC Theaters', status: 'completed', date: getDateInMonth(2, 22), notes: 'Movie night' },
+
+                    // 3 Months Ago
+                    { id: uuidv4(), type: 'income', amount: 6500, category: 'Salary', recipientName: 'Tech Corp', status: 'completed', date: getDateInMonth(3, 1), notes: 'Monthly Salary' },
+                    { id: uuidv4(), type: 'income', amount: 1200, category: 'Investment', recipientName: 'Stock Dividend', status: 'completed', date: getDateInMonth(3, 10), notes: 'Quarterly payout' },
+                    { id: uuidv4(), type: 'expense', amount: 1800, category: 'Bills & Utilities', recipientName: 'Landlord', status: 'completed', date: getDateInMonth(3, 1), notes: 'Rent' },
+                    { id: uuidv4(), type: 'expense', amount: 420, category: 'Food & Grocery', recipientName: 'Local Market', status: 'completed', date: getDateInMonth(3, 14), notes: 'Farmers market' },
+                    { id: uuidv4(), type: 'expense', amount: 250, category: 'Shopping', recipientName: 'Amazon', status: 'completed', date: getDateInMonth(3, 20), notes: 'Electronics' },
                 ],
                 cards: [
-                    { id: uuidv4(), cardNumber: '4532', cardHolder: 'RAHUL P', expiryDate: '12/25', cardType: 'visa', nickname: 'Primary' },
-                    { id: uuidv4(), cardNumber: '8821', cardHolder: 'RAHUL P', expiryDate: '09/24', cardType: 'mastercard', nickname: 'Travel' }
+                    { id: uuidv4(), cardNumber: '4532', cardHolder: 'RAHUL P', expiryDate: '12/25', cardType: 'visa', nickname: 'Primary Checking' },
+                    { id: uuidv4(), cardNumber: '8821', cardHolder: 'RAHUL P', expiryDate: '09/24', cardType: 'mastercard', nickname: 'Travel Rewards' },
+                    { id: uuidv4(), cardNumber: '3711', cardHolder: 'RAHUL P', expiryDate: '11/26', cardType: 'amex', nickname: 'Business Expenses' }
                 ],
                 goals: [
-                    { id: uuidv4(), name: 'Vacation', targetAmount: 2000, currentAmount: 850, targetDate: '2024-12-01' },
-                    { id: uuidv4(), name: 'Emergency Fund', targetAmount: 10000, currentAmount: 3200, targetDate: '2025-01-01' }
+                    { id: uuidv4(), name: 'Japan Vacation', targetAmount: 5000, currentAmount: 2850, targetDate: '2024-11-01' },
+                    { id: uuidv4(), name: 'Emergency Fund', targetAmount: 15000, currentAmount: 8200, targetDate: '2025-06-01' },
+                    { id: uuidv4(), name: 'New Laptop', targetAmount: 2500, currentAmount: 2500, targetDate: '2024-05-01' } // Completed goal
                 ],
                 budget: {
-                    Investment: 1000,
-                    Travelling: 200,
-                    'Food & Grocery': 600,
-                    Entertainment: 200,
-                    Healthcare: 100,
-                    Others: 300
+                    Investment: 1200,
+                    Travelling: 400,
+                    'Food & Grocery': 800,
+                    Entertainment: 300,
+                    Healthcare: 150,
+                    Others: 400
                 }
             };
             setData(initialData);

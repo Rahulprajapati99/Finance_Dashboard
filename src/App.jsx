@@ -4,7 +4,6 @@ import { DataProvider } from './context/DataContext';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
-import Wallet from './pages/Wallet';
 import Goals from './pages/Goals';
 import Analytics from './pages/Analytics';
 import Reports from './pages/Reports';
@@ -25,7 +24,6 @@ function App() {
                     <Route path="/" element={<Layout />}>
                         <Route index element={<Dashboard />} />
                         <Route path="transactions" element={<Transactions />} />
-                        <Route path="wallet" element={<Wallet />} />
                         <Route path="goals" element={<Goals />} />
                         <Route path="analytics" element={<Analytics />} />
                         <Route path="reports" element={<Reports />} />

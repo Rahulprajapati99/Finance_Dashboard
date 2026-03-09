@@ -10,7 +10,6 @@ const defaultContextValue = {
     data: {
         user: { id: 'u1', name: 'Rahul P', monthlySpendingLimit: 5000, avatar: null },
         transactions: [],
-        cards: [],
         goals: [],
         budget: { Investment: 0, Travelling: 0, 'Food & Grocery': 0, Entertainment: 0, Healthcare: 0, Others: 0 },
         notifications: []
@@ -19,11 +18,9 @@ const defaultContextValue = {
     addTransaction: async () => { },
     deleteTransaction: async () => { },
     editTransaction: async () => { },
-    addCard: () => { },
-    deleteCard: () => { },
-    addGoal: () => { },
-    updateGoal: () => { },
-    deleteGoal: () => { },
+    addGoal: async () => { },
+    updateGoal: async () => { },
+    deleteGoal: async () => { },
     updateBudget: () => { },
     updateUser: () => { },
     markNotificationRead: () => { },
@@ -83,26 +80,44 @@ export const DataProvider = ({ children }) => {
 
         const token = localStorage.getItem('sb-token');
 
-        // Load local data first (cards/goals/budget/user/notifications)
+        // Load local data first (budget/user/notifications)
         const saved = localStorage.getItem('finance_db');
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
-                setData(prev => ({ ...prev, ...parsed }));
+                // Ensure we don't overwrite transactions or goals with empty defaults from local storage if they are missing
+                setData(prev => ({ ...prev, ...parsed, transactions: prev.transactions, goals: prev.goals }));
             } catch (e) { /* ignore */ }
         }
 
-        // Try to load transactions from Supabase with user token
+        // Try to load transactions and goals from Supabase with user token
         if (SUPABASE_URL && SUPABASE_KEY && token) {
             try {
-                const txData = await supabaseFetch('transactions?select=*&order=date.desc', {
+                // Fetch transactions
+                const txPromise = supabaseFetch('transactions?select=*&order=date.desc', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (txData) {
-                    setData(prev => ({ ...prev, transactions: txData }));
-                }
+                // Fetch goals
+                const goalsPromise = supabaseFetch('goals?select=*&order=created_at.asc', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const [txData, goalsData] = await Promise.all([txPromise, goalsPromise]);
+
+                setData(prev => ({
+                    ...prev,
+                    transactions: txData || prev.transactions,
+                    // Map snake_case from DB to camelCase for frontend
+                    goals: (goalsData || []).map(g => ({
+                        id: g.id,
+                        name: g.name,
+                        targetAmount: Number(g.target_amount),
+                        currentAmount: Number(g.current_amount),
+                        targetDate: g.target_date
+                    }))
+                }));
             } catch (err) {
-                console.warn('Supabase transactions fetch failed:', err.message);
+                console.warn('Supabase fetch failed:', err.message);
                 if (err.message.includes('401')) logout();
             }
         }
@@ -120,10 +135,10 @@ export const DataProvider = ({ children }) => {
         init();
     }, []);
 
-    // Persist non-transaction data locally
+    // Persist non-transaction/non-goal data locally
     useEffect(() => {
         if (!isLoading) {
-            const { transactions, ...rest } = data;
+            const { transactions, goals, ...rest } = data;
             localStorage.setItem('finance_db', JSON.stringify(rest));
         }
     }, [data, isLoading]);
@@ -172,11 +187,60 @@ export const DataProvider = ({ children }) => {
         }
     };
 
-    const addCard = (card) => setData(prev => ({ ...prev, cards: [...prev.cards, { id: uuidv4(), ...card }] }));
-    const deleteCard = (id) => setData(prev => ({ ...prev, cards: prev.cards.filter(c => c.id !== id) }));
-    const addGoal = (goal) => setData(prev => ({ ...prev, goals: [...prev.goals, { id: uuidv4(), ...goal }] }));
-    const updateGoal = (g) => setData(prev => ({ ...prev, goals: prev.goals.map(x => x.id === g.id ? g : x) }));
-    const deleteGoal = (id) => setData(prev => ({ ...prev, goals: prev.goals.filter(g => g.id !== id) }));
+    const addGoal = async (goal) => {
+        const token = localStorage.getItem('sb-token');
+        const newGoal = { ...goal, id: uuidv4() };
+        setData(prev => ({ ...prev, goals: [...prev.goals, newGoal] }));
+
+        if (SUPABASE_URL && SUPABASE_KEY && token) {
+            try {
+                await supabaseFetch('goals', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({
+                        id: newGoal.id,
+                        name: newGoal.name,
+                        target_amount: newGoal.targetAmount,
+                        current_amount: newGoal.currentAmount || 0,
+                        target_date: newGoal.targetDate
+                    })
+                });
+            } catch (err) { console.error('Insert goal error:', err.message); }
+        }
+    };
+
+    const updateGoal = async (g) => {
+        const token = localStorage.getItem('sb-token');
+        setData(prev => ({ ...prev, goals: prev.goals.map(x => x.id === g.id ? g : x) }));
+
+        if (SUPABASE_URL && SUPABASE_KEY && token) {
+            try {
+                await supabaseFetch(`goals?id=eq.${g.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({
+                        name: g.name,
+                        target_amount: g.targetAmount,
+                        current_amount: g.currentAmount,
+                        target_date: g.targetDate
+                    })
+                });
+            } catch (err) { console.error('Update goal error:', err.message); }
+        }
+    };
+
+    const deleteGoal = async (id) => {
+        const token = localStorage.getItem('sb-token');
+        setData(prev => ({ ...prev, goals: prev.goals.filter(g => g.id !== id) }));
+        if (SUPABASE_URL && SUPABASE_KEY && token) {
+            try {
+                await supabaseFetch(`goals?id=eq.${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            } catch (err) { console.error('Delete goal error:', err.message); }
+        }
+    };
     const updateBudget = (cat, amt) => setData(prev => ({ ...prev, budget: { ...prev.budget, [cat]: Number(amt) } }));
     const updateUser = (u) => setData(prev => ({ ...prev, user: { ...prev.user, ...u } }));
     const markNotificationRead = (id) => setData(prev => ({ ...prev, notifications: prev.notifications.map(n => n.id === id ? { ...n, read: true } : n) }));
@@ -187,7 +251,6 @@ export const DataProvider = ({ children }) => {
         <DataContext.Provider value={{
             data, isLoading,
             addTransaction, deleteTransaction, editTransaction,
-            addCard, deleteCard,
             addGoal, updateGoal, deleteGoal,
             updateBudget, updateUser,
             markNotificationRead, clearAllNotifications, resetData,

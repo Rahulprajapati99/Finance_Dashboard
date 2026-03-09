@@ -13,7 +13,6 @@ const Sidebar = () => {
     const navItems = [
         { path: '/', label: 'Dashboard', icon: LayoutDashboard },
         { path: '/transactions', label: 'Transactions', icon: ArrowRightLeft },
-        { path: '/wallet', label: 'Wallet', icon: Wallet },
         { path: '/goals', label: 'Goals', icon: Target },
         { path: '/analytics', label: 'Analytics', icon: PieChart },
         { path: '/reports', label: 'Reports', icon: FileText },
