@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useData } from '@/context/DataContext';
+import Link from 'next/link';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { ArrowUpRight, ArrowDownRight, Wallet, PiggyBank, Plus, TrendingUp } from 'lucide-react';
