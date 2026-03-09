@@ -129,7 +129,25 @@ const Dashboard = () => {
                 <MetricCard title="Total Balance" amount={totalBalance} icon={Wallet} trend={12.5} type="neutral" />
                 <MetricCard title="Total Income" amount={totalIncome} icon={ArrowDownRight} trend={8.2} type="income" />
                 <MetricCard title="Total Expense" amount={totalExpense} icon={ArrowUpRight} trend={-2.4} type="expense" />
-                <MetricCard title="Total Savings" amount={totalSavings} icon={PiggyBank} trend={5.3} type="neutral" />
+                <div style={{ position: 'relative' }}>
+                    <MetricCard title="Total Savings" amount={totalSavings} icon={PiggyBank} trend={5.3} type="neutral" />
+                    {totalSavings > (data.goals.reduce((acc, g) => acc + g.targetAmount, 0)) && (
+                        <div style={{
+                            position: 'absolute',
+                            bottom: '-25px',
+                            left: '1.5rem',
+                            fontSize: '11px',
+                            color: '#059669',
+                            fontWeight: 600,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                        }}>
+                            <TrendingUp size={12} />
+                            ${(totalSavings - data.goals.reduce((acc, g) => acc + g.targetAmount, 0)).toLocaleString()} Extra Surplus
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
