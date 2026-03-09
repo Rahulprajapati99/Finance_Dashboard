@@ -53,7 +53,22 @@ const Dashboard = () => {
 
     if (isLoading || !data) return <div style={{ padding: '2rem' }}>Loading...</div>;
 
-    const { transactions, budget } = data;
+    const { transactions, budget, user } = data;
+
+    // Calculate current month expenses
+    const now = new Date();
+    const currentMonthTransactions = transactions.filter(tx => {
+        const txDate = new Date(tx.date);
+        return txDate.getMonth() === now.getMonth() && txDate.getFullYear() === now.getFullYear();
+    });
+
+    const currentMonthExpense = currentMonthTransactions
+        .filter(tx => tx.type === 'expense')
+        .reduce((acc, tx) => acc + (Number(tx.amount) || 0), 0);
+
+    const spendingLimit = user?.monthlySpendingLimit || 5000;
+    const budgetUsagePercent = Math.min((currentMonthExpense / spendingLimit) * 100, 100);
+    const isOverLimit = currentMonthExpense > spendingLimit;
 
     const totalBalance = totalIncome - totalExpense;
 
@@ -147,6 +162,51 @@ const Dashboard = () => {
                             ${(totalSavings - data.goals.reduce((acc, g) => acc + g.targetAmount, 0)).toLocaleString()} Extra Surplus
                         </div>
                     )}
+                </div>
+            </div>
+
+            {/* Budget Health Section */}
+            <div style={{
+                backgroundColor: 'var(--color-white)',
+                padding: '1.5rem',
+                borderRadius: '12px',
+                boxShadow: 'var(--shadow-card)',
+                marginBottom: '2rem',
+                border: isOverLimit ? '1px solid #EF4444' : '1px solid transparent'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <div>
+                        <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>Monthly Budget Health</h4>
+                        <p style={{ margin: '4px 0 0', fontSize: '14px', color: 'var(--color-text-body)' }}>
+                            You've spent <strong>${currentMonthExpense.toLocaleString()}</strong> of your <strong>${spendingLimit.toLocaleString()}</strong> limit for {now.toLocaleString('default', { month: 'long' })}.
+                        </p>
+                    </div>
+                    {isOverLimit && (
+                        <span style={{
+                            backgroundColor: '#FEE2E2',
+                            color: '#B91C1C',
+                            padding: '4px 12px',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: 600
+                        }}>
+                            Limit Exceeded!
+                        </span>
+                    )}
+                </div>
+                <div style={{
+                    width: '100%',
+                    height: '10px',
+                    backgroundColor: '#F3F4F6',
+                    borderRadius: '5px',
+                    overflow: 'hidden'
+                }}>
+                    <div style={{
+                        width: `${budgetUsagePercent}%`,
+                        height: '100%',
+                        backgroundColor: isOverLimit ? '#EF4444' : budgetUsagePercent > 80 ? '#F59E0B' : '#2E3A8C',
+                        transition: 'width 0.5s ease-in-out'
+                    }} />
                 </div>
             </div>
 

@@ -114,7 +114,7 @@ const Sidebar = () => {
                             {user ? user.name : 'Loading...'}
                         </div>
                         <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
-                            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>View Profile</div>
+
                             <button
                                 onClick={logout}
                                 style={{
