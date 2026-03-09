@@ -70,6 +70,11 @@ function parseJWT(token) {
     }
 }
 
+const sanitizeText = (text, maxLength = 200) => {
+    if (!text || typeof text !== 'string') return '';
+    return text.replace(/<[^>]*>?/gm, '').trim().substring(0, maxLength);
+};
+
 export const DataProvider = ({ children }) => {
     const [data, setData] = useState(defaultContextValue.data);
     const [isLoading, setIsLoading] = useState(true);
@@ -161,7 +166,7 @@ export const DataProvider = ({ children }) => {
                         id: userId,
                         name: userProfile?.name || fullName,
                         monthlySpendingLimit: userProfile?.monthly_spending_limit || null,
-                        categoryBudgets: userProfile?.category_budgets || {
+                        categoryBudget: userProfile?.category_budget || {
                             'Food & Grocery': 0,
                             'Transport': 0,
                             'Bills & Utilities': 0,
@@ -288,8 +293,8 @@ export const DataProvider = ({ children }) => {
                     body: JSON.stringify({
                         id: newGoal.id,
                         name: newGoal.name,
-                        target_amount: newGoal.targetAmount,
-                        current_amount: newGoal.currentAmount || 0,
+                        target_amount: Number(newGoal.targetAmount),
+                        current_amount: Number(newGoal.currentAmount || 0),
                         target_date: newGoal.targetDate
                     })
                 });
@@ -315,8 +320,8 @@ export const DataProvider = ({ children }) => {
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({
                         name: sanitizedGoal.name,
-                        target_amount: sanitizedGoal.targetAmount,
-                        current_amount: sanitizedGoal.currentAmount,
+                        target_amount: Number(sanitizedGoal.targetAmount),
+                        current_amount: Number(sanitizedGoal.currentAmount),
                         target_date: sanitizedGoal.targetDate
                     })
                 });
@@ -349,7 +354,7 @@ export const DataProvider = ({ children }) => {
                 ...u,
                 name: sanitizedName,
                 monthlySpendingLimit: u.monthlySpendingLimit === undefined ? data.user.monthlySpendingLimit : (u.monthlySpendingLimit === null ? null : Number(u.monthlySpendingLimit)),
-                categoryBudgets: u.categoryBudgets || data.user.categoryBudgets
+                categoryBudget: u.categoryBudget || data.user.categoryBudget
             };
             setData(prev => ({ ...prev, user: updatedUser }));
 
@@ -361,7 +366,7 @@ export const DataProvider = ({ children }) => {
                         name: updatedUser.name,
                         monthly_spending_limit: updatedUser.monthlySpendingLimit,
                         avatar_url: updatedUser.avatar,
-                        category_budgets: updatedUser.categoryBudgets
+                        category_budget: updatedUser.categoryBudget
                     })
                 });
             }

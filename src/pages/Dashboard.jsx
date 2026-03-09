@@ -88,7 +88,7 @@ const Dashboard = () => {
 
     const budgetLabels = Object.keys(budget).filter(cat => budget[cat] > 0);
     const budgetValues = Object.values(budget).filter(v => v > 0);
-    const hasBudgets = budgetValues.length > 0;
+    const hasBudget = budgetValues.length > 0;
 
     const budgetData = {
         labels: budgetLabels,
@@ -228,15 +228,17 @@ const Dashboard = () => {
                     </div>
                 </div>
                 <div style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)', height: '400px' }}>
-                    <h3 style={{ marginBottom: '1.5rem', fontSize: '18px' }}>Category Budgets</h3>
+                    <h3 style={{ marginBottom: '1.5rem', fontSize: '18px' }}>Category Budget</h3>
                     <div style={{ height: '250px', display: 'flex', justifyContent: 'center' }}>
-                        {hasBudgets ? (
+                        {hasBudget ? (
                             <Doughnut data={budgetData} options={{ maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }} />
                         ) : (
-                            <p style={{ color: '#9CA3AF', alignSelf: 'center', textAlign: 'center' }}>
-                                No category budgets set yet.<br />
-                                <a href="/settings" style={{ color: 'var(--color-primary)', fontSize: '14px' }}>Set budgets in Settings</a>
-                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: 'var(--color-text-body)' }}>
+                                <p style={{ fontSize: '14px', marginBottom: '1rem' }}>No budget set for your categories yet.</p>
+                                <Link to="/settings" style={{ color: 'var(--color-primary)', fontSize: '14px', textDecoration: 'underline' }}>
+                                    Configure Budget in Settings
+                                </Link>
+                            </div>
                         )}
                     </div>
                 </div>

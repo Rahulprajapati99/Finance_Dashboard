@@ -19,13 +19,18 @@ function parseJWT(token) {
     }
 }
 
+const sanitizeText = (text, maxLength = 200) => {
+    if (!text || typeof text !== 'string') return '';
+    return text.replace(/<[^>]*>?/gm, '').trim().substring(0, maxLength);
+};
+
 export const DataProvider = ({ children }) => {
     const [data, setData] = useState({
         user: {
             id: 'u1',
             name: 'User',
             monthlySpendingLimit: null,
-            categoryBudgets: {
+            categoryBudget: {
                 'Food & Grocery': 0,
                 'Transport': 0,
                 'Bills & Utilities': 0,
@@ -120,7 +125,15 @@ export const DataProvider = ({ children }) => {
             goals: [...prev.goals, { ...sanitizedGoal, id: uuidv4() }]
         }));
     };
-    const updateGoal = (updatedGoal) => setData(prev => ({ ...prev, goals: prev.goals.map(g => g.id === updatedGoal.id ? updatedGoal : g) }));
+    const updateGoal = (updatedGoal) => {
+        const sanitizedGoal = {
+            ...updatedGoal,
+            name: sanitizeText(updatedGoal.name, 100),
+            targetAmount: Number(updatedGoal.targetAmount),
+            currentAmount: Number(updatedGoal.currentAmount)
+        };
+        setData(prev => ({ ...prev, goals: prev.goals.map(g => g.id === sanitizedGoal.id ? sanitizedGoal : g) }));
+    };
     const deleteGoal = (id) => setData(prev => ({ ...prev, goals: prev.goals.filter(g => g.id !== id) }));
     const updateBudget = (category, amount) => setData(prev => ({ ...prev, budget: { ...prev.budget, [category]: Number(amount) } }));
     const updateUser = (u) => {
@@ -130,7 +143,7 @@ export const DataProvider = ({ children }) => {
             ...u,
             name: sanitizedName,
             monthlySpendingLimit: u.monthlySpendingLimit === undefined ? data.user.monthlySpendingLimit : (u.monthlySpendingLimit === null ? null : Number(u.monthlySpendingLimit)),
-            categoryBudgets: u.categoryBudgets || data.user.categoryBudgets
+            categoryBudget: u.categoryBudget || data.user.categoryBudget
         };
         setData(prev => ({ ...prev, user: updatedUser }));
     };

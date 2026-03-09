@@ -78,14 +78,14 @@ const Dashboard = () => {
         }]
     };
 
-    const hasBudgets = Object.values(budget).some(v => v > 0);
+    const hasBudget = Object.values(budget).some(v => v > 0); // Renamed hasBudgets to hasBudget
 
     const budgetData = {
         labels: Object.keys(budget).filter(cat => budget[cat] > 0),
         datasets: [{
             data: Object.values(budget).filter(v => v > 0),
-            backgroundColor: ['#2E3A8C', '#4A5FD9', '#FF9800', '#4CAF50', '#E91E63', '#9C27B0'],
-            borderWidth: 0
+            backgroundColor: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#6B7280'],
+            borderWidth: 0,
         }]
     };
 
@@ -213,11 +213,18 @@ const Dashboard = () => {
                     </div>
                 </div>
                 <div style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)', height: '400px' }}>
-                    <h3 style={{ marginBottom: '1.5rem', fontSize: '18px' }}>Category Budgets</h3>
+                    <h3 style={{ marginBottom: '1.5rem', fontSize: '18px' }}>Category Budget</h3>
                     <div style={{ height: '250px', display: 'flex', justifyContent: 'center' }}>
-                        {hasBudgets
+                        {hasBudget // Used hasBudget
                             ? <Doughnut data={budgetData} options={{ maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }} />
-                            : <p style={{ color: '#9CA3AF', alignSelf: 'center', textAlign: 'center' }}>No category budgets set yet.<br /><a href="/settings" style={{ color: 'var(--color-primary)', fontSize: '14px' }}>Set budgets in Settings</a></p>
+                            : (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: 'var(--color-text-body)' }}>
+                                    <p style={{ fontSize: '14px', marginBottom: '1rem' }}>No budget set for your categories yet.</p>
+                                    <Link href="/settings" style={{ color: 'var(--color-primary)', fontSize: '14px', textDecoration: 'underline' }}>
+                                        Configure Budget in Settings
+                                    </Link>
+                                </div>
+                            )
                         }
                     </div>
                 </div>

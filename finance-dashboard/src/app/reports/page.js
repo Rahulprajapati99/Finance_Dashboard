@@ -21,6 +21,18 @@ const Reports = () => {
             return txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear;
         });
 
+        console.log('PDF Generation:', {
+            total: transactions.length,
+            filtered: monthlyTx.length,
+            month: currentMonth,
+            year: currentYear
+        });
+
+        if (monthlyTx.length === 0) {
+            alert('No transactions found for the current month.');
+            return;
+        }
+
         let totalIncome = 0;
         let totalExpense = 0;
 

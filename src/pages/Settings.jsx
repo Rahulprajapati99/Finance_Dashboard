@@ -3,22 +3,45 @@ import { useData } from '../context/DataContext';
 import { useTheme } from '../context/ThemeContext';
 import { User, Shield, Bell, Moon, Sun, Trash2, Save } from 'lucide-react';
 
+const Section = ({ title, icon: Icon, children }) => (
+    <div style={{
+        backgroundColor: 'var(--color-white)',
+        padding: '1.5rem',
+        borderRadius: 'var(--radius-lg)',
+        boxShadow: 'var(--shadow-card)',
+        marginBottom: '2rem'
+    }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div style={{
+                padding: '10px',
+                borderRadius: '12px',
+                background: 'var(--color-bg-light)',
+                marginRight: '1rem'
+            }}>
+                <Icon size={24} color="var(--color-primary)" />
+            </div>
+            <h3 style={{ margin: 0 }}>{title}</h3>
+        </div>
+        {children}
+    </div>
+);
+
 const Settings = () => {
     const { data, updateUser, resetData } = useData();
     const { isDarkMode, toggleTheme } = useTheme();
     const [name, setName] = useState(data?.user?.name || '');
     const [limit, setLimit] = useState(data?.user?.monthlySpendingLimit || '');
     const [error, setError] = useState('');
-    const [catBudgets, setCatBudgets] = useState(data?.user?.categoryBudgets || {});
+    const [catBudget, setCatBudget] = useState(data?.user?.categoryBudget || {});
 
     // Sync local state when context data changes
     useEffect(() => {
         if (data?.user) {
             setName(data.user.name || '');
             setLimit(data.user.monthlySpendingLimit === null ? '' : data.user.monthlySpendingLimit);
-            setCatBudgets(data.user.categoryBudgets || {});
+            setCatBudget(data.user.categoryBudget || {});
         }
-    }, [data?.user?.name, data?.user?.monthlySpendingLimit, data?.user?.categoryBudgets]);
+    }, [data?.user?.name, data?.user?.monthlySpendingLimit, data?.user?.categoryBudget]);
 
     const handleSaveProfile = async () => {
         setError('');
@@ -40,41 +63,21 @@ const Settings = () => {
         await updateUser({
             name: name.trim(),
             monthlySpendingLimit: limit === '' ? null : Number(limit),
-            categoryBudgets: catBudgets
+            categoryBudget: catBudget
         });
         alert('Profile updated successfully!');
     };
 
-    const handleResetBudgets = (type) => {
-        if (window.confirm(`Are you sure you want to reset all category budgets ${type}?`)) {
-            const reset = Object.keys(catBudgets).reduce((acc, cat) => ({ ...acc, [cat]: 0 }), {});
-            setCatBudgets(reset);
-            updateUser({ categoryBudgets: reset });
+    const handleResetBudget = () => {
+        if (window.confirm('Are you sure you want to reset your category budget?')) {
+            const reset = Object.keys(catBudget).reduce((acc, cat) => ({ ...acc, [cat]: 0 }), {});
+            setCatBudget(reset);
+            updateUser({ categoryBudget: reset });
+            alert('Budget reset successfully!');
         }
     };
 
-    const Section = ({ title, icon: Icon, children }) => (
-        <div style={{
-            backgroundColor: 'var(--color-white)',
-            padding: '1.5rem',
-            borderRadius: 'var(--radius-lg)',
-            boxShadow: 'var(--shadow-card)',
-            marginBottom: '2rem'
-        }}>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <div style={{
-                    padding: '10px',
-                    borderRadius: '12px',
-                    background: 'var(--color-bg-light)',
-                    marginRight: '1rem'
-                }}>
-                    <Icon size={24} color="var(--color-primary)" />
-                </div>
-                <h3 style={{ margin: 0 }}>{title}</h3>
-            </div>
-            {children}
-        </div>
-    );
+
 
     return (
         <div style={{ paddingBottom: '2rem', maxWidth: '800px', margin: '0 auto' }}>
@@ -135,18 +138,18 @@ const Settings = () => {
                 </div>
             </Section>
 
-            <Section title="Category Budgets" icon={Save}>
+            <Section title="Category Budget" icon={Save}>
                 <p style={{ color: 'var(--color-text-body)', fontSize: '14px', marginBottom: '1.5rem' }}>
-                    Set individual monthly limits for each spending category. These will show up in your Dashboard graphs.
+                    Set individual monthly limits for each spending category. These will show up in your Dashboard graph.
                 </p>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-                    {Object.keys(catBudgets).map(cat => (
+                    {Object.keys(catBudget).map(cat => (
                         <div key={cat}>
                             <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '13px', fontWeight: 500 }}>{cat}</label>
                             <input
                                 type="number"
-                                value={catBudgets[cat]}
-                                onChange={(e) => setCatBudgets({ ...catBudgets, [cat]: Number(e.target.value) })}
+                                value={catBudget[cat]}
+                                onChange={(e) => setCatBudget({ ...catBudget, [cat]: Number(e.target.value) })}
                                 style={{
                                     width: '100%',
                                     padding: '10px',
@@ -160,7 +163,10 @@ const Settings = () => {
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <button
-                        onClick={handleSaveProfile}
+                        onClick={async () => {
+                            await handleSaveProfile();
+                            alert('Budget updated successfully!');
+                        }}
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -171,19 +177,13 @@ const Settings = () => {
                         }}
                     >
                         <Save size={18} />
-                        Save Budgets
+                        Save Budget
                     </button>
                     <button
-                        onClick={() => handleResetBudgets('Monthly')}
+                        onClick={handleResetBudget}
                         style={{ padding: '12px 20px', background: 'var(--color-bg-light)', border: '1px solid var(--color-border)' }}
                     >
-                        Reset Monthly
-                    </button>
-                    <button
-                        onClick={() => handleResetBudgets('Annually')}
-                        style={{ padding: '12px 20px', background: 'var(--color-bg-light)', border: '1px solid var(--color-border)' }}
-                    >
-                        Reset Annually
+                        Reset Budget
                     </button>
                 </div>
             </Section>
