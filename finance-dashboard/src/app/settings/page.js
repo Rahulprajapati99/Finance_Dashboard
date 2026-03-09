@@ -1,8 +1,6 @@
 "use client";
 
-
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useData } from '@/context/DataContext';
 import { useTheme } from '@/context/ThemeContext';
 import { User, Shield, Bell, Moon, Sun, Trash2, Save } from 'lucide-react';
@@ -10,11 +8,19 @@ import { User, Shield, Bell, Moon, Sun, Trash2, Save } from 'lucide-react';
 const Settings = () => {
     const { data, updateUser, resetData } = useData();
     const { isDarkMode, toggleTheme } = useTheme();
-    const [name, setName] = useState(data.user.name);
-    const [limit, setLimit] = useState(data.user.monthlySpendingLimit);
+    const [name, setName] = useState(data?.user?.name || '');
+    const [limit, setLimit] = useState(data?.user?.monthlySpendingLimit || 5000);
 
-    const handleSaveProfile = () => {
-        updateUser({ name, monthlySpendingLimit: limit });
+    // Sync local state when context data changes (e.g. after sync from Supabase)
+    useEffect(() => {
+        if (data?.user) {
+            setName(data.user.name || '');
+            setLimit(data.user.monthlySpendingLimit || 5000);
+        }
+    }, [data?.user?.name, data?.user?.monthlySpendingLimit]);
+
+    const handleSaveProfile = async () => {
+        await updateUser({ name, monthlySpendingLimit: limit });
         alert('Profile updated successfully!');
     };
 

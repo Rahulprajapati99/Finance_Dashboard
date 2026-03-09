@@ -283,7 +283,25 @@ export const DataProvider = ({ children }) => {
         }
     };
     const updateBudget = (cat, amt) => setData(prev => ({ ...prev, budget: { ...prev.budget, [cat]: Number(amt) } }));
-    const updateUser = (u) => setData(prev => ({ ...prev, user: { ...prev.user, ...u } }));
+    const updateUser = async (u) => {
+        const token = localStorage.getItem('sb-token');
+        const updatedUser = { ...data.user, ...u };
+        setData(prev => ({ ...prev, user: updatedUser }));
+
+        if (SUPABASE_URL && SUPABASE_KEY && token) {
+            try {
+                await supabaseFetch(`profiles?id=eq.${data.user.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({
+                        name: updatedUser.name,
+                        monthly_spending_limit: Number(updatedUser.monthlySpendingLimit),
+                        avatar_url: updatedUser.avatar
+                    })
+                });
+            } catch (err) { console.error('Update profile error:', err.message); }
+        }
+    };
     const markNotificationRead = (id) => setData(prev => ({ ...prev, notifications: prev.notifications.map(n => n.id === id ? { ...n, read: true } : n) }));
     const clearAllNotifications = () => setData(prev => ({ ...prev, notifications: [] }));
     const resetData = () => { localStorage.removeItem('finance_db'); localStorage.removeItem('sb-token'); window.location.reload(); };
