@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useData } from '@/context/DataContext';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
-import { ArrowUpRight, ArrowDownRight, Wallet, PiggyBank, Plus } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Wallet, PiggyBank, Plus, TrendingUp } from 'lucide-react';
 import AddTransactionModal from '@/components/AddTransactionModal';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
