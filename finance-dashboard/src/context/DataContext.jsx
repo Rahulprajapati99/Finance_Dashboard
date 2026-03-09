@@ -8,7 +8,7 @@ const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 // SSR-safe default prevents crash during Next.js prerendering
 const defaultContextValue = {
     data: {
-        user: { id: 'u1', name: 'Rahul P', monthlySpendingLimit: 5000, avatar: null },
+        user: { id: 'u1', name: 'User', monthlySpendingLimit: 5000, avatar: null },
         transactions: [],
         goals: [],
         budget: { Investment: 0, Travelling: 0, 'Food & Grocery': 0, Entertainment: 0, Healthcare: 0, Others: 0 },
@@ -94,9 +94,16 @@ export const DataProvider = ({ children }) => {
             } catch (e) { /* ignore */ }
         }
 
-        // Try to load transactions and goals from Supabase with user token
+        // Try to load transactions, goals, and profile from Supabase with user token
         if (SUPABASE_URL && SUPABASE_KEY && token) {
             try {
+                // Decode token to get user metadata (name/email)
+                const payloadStr = token.split('.')[1];
+                const payload = JSON.parse(atob(payloadStr));
+                const userId = payload.sub;
+                const metadata = payload.user_metadata || {};
+                const fullName = metadata.full_name || metadata.name || 'User';
+
                 // Fetch transactions
                 const txPromise = supabaseFetch('transactions?select=*&order=date.desc', {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -105,18 +112,47 @@ export const DataProvider = ({ children }) => {
                 const goalsPromise = supabaseFetch('goals?select=*&order=created_at.asc', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                // Fetch profile
+                const profilePromise = supabaseFetch(`profiles?id=eq.${userId}&select=*`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-                const [txData, goalsData] = await Promise.all([txPromise, goalsPromise]);
+                const [txData, goalsData, profileData] = await Promise.all([txPromise, goalsPromise, profilePromise]);
+
+                let userProfile = profileData && profileData.length > 0 ? profileData[0] : null;
+
+                // Create profile if it doesn't exist
+                if (!userProfile) {
+                    try {
+                        userProfile = await supabaseFetch('profiles', {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({
+                                id: userId,
+                                name: fullName,
+                                monthly_spending_limit: 5000
+                            })
+                        });
+                        // Supabase representation returns an array usually
+                        if (Array.isArray(userProfile)) userProfile = userProfile[0];
+                    } catch (e) { console.error('Profile creation failed:', e); }
+                }
 
                 setData(prev => ({
                     ...prev,
+                    user: {
+                        id: userId,
+                        name: userProfile?.name || fullName,
+                        monthlySpendingLimit: Number(userProfile?.monthly_spending_limit) || 5000,
+                        avatar: metadata.avatar_url || null
+                    },
                     transactions: txData || prev.transactions,
                     // Map snake_case from DB to camelCase for frontend
                     goals: (goalsData || []).map(g => ({
                         id: g.id,
                         name: g.name,
                         targetAmount: Number(g.target_amount),
-                        currentAmount: Number(g.current_amount), // Fix: ensure this is mapped correctly
+                        currentAmount: Number(g.current_amount),
                         targetDate: g.target_date
                     }))
                 }));
