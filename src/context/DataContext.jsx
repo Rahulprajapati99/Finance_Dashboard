@@ -34,8 +34,12 @@ export const DataProvider = ({ children }) => {
                     // Extract name from token (same logic as Next.js version)
                     const payloadStr = token.split('.')[1];
                     const payload = JSON.parse(atob(payloadStr));
-                    const metadata = payload.user_metadata || {};
-                    const fullName = metadata.full_name || metadata.name || 'User';
+                    const metadata = payload.user_metadata || payload.raw_user_meta_data || {};
+                    const fullName = metadata.full_name ||
+                        metadata.name ||
+                        (metadata.given_name ? `${metadata.given_name} ${metadata.family_name || ''}`.trim() : null) ||
+                        payload.email?.split('@')[0] ||
+                        'User';
 
                     setData(prev => ({
                         ...prev,

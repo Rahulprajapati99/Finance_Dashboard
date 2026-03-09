@@ -101,8 +101,12 @@ export const DataProvider = ({ children }) => {
                 const payloadStr = token.split('.')[1];
                 const payload = JSON.parse(atob(payloadStr));
                 const userId = payload.sub;
-                const metadata = payload.user_metadata || {};
-                const fullName = metadata.full_name || metadata.name || 'User';
+                const metadata = payload.user_metadata || payload.raw_user_meta_data || {};
+                const fullName = metadata.full_name ||
+                    metadata.name ||
+                    (metadata.given_name ? `${metadata.given_name} ${metadata.family_name || ''}`.trim() : null) ||
+                    payload.email?.split('@')[0] ||
+                    'User';
 
                 // Fetch transactions
                 const txPromise = supabaseFetch('transactions?select=*&order=date.desc', {
