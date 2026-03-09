@@ -61,26 +61,40 @@ const Settings = () => {
             return;
         }
 
-        await updateUser({
-            name: name.trim(),
-            monthlySpendingLimit: limit === '' ? null : Number(limit)
-        });
-        alert('Profile updated successfully!');
+        try {
+            await updateUser({
+                name: name.trim(),
+                monthlySpendingLimit: limit === '' ? null : Number(limit)
+            });
+            alert('Profile updated successfully!');
+        } catch (err) {
+            setError('Failed to save profile: ' + err.message);
+            alert('Error saving profile: ' + err.message);
+        }
     };
 
     const handleSaveBudget = async () => {
-        await updateUser({
-            categoryBudget: catBudget
-        });
-        alert('Budget updated successfully!');
+        try {
+            await updateUser({
+                categoryBudget: catBudget
+            });
+            alert('Budget updated successfully!');
+        } catch (err) {
+            setError('Failed to save budget: ' + err.message);
+            alert('Error saving budget: ' + err.message);
+        }
     };
 
-    const handleResetBudget = () => {
+    const handleResetBudget = async () => {
         if (window.confirm('Are you sure you want to reset your category budget?')) {
             const reset = Object.keys(catBudget).reduce((acc, cat) => ({ ...acc, [cat]: 0 }), {});
             setCatBudget(reset);
-            updateUser({ categoryBudget: reset });
-            alert('Budget reset successfully!');
+            try {
+                await updateUser({ categoryBudget: reset });
+                alert('Budget reset successfully!');
+            } catch (err) {
+                setError('Failed to reset budget: ' + err.message);
+            }
         }
     };
 

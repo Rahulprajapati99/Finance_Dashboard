@@ -348,35 +348,29 @@ export const DataProvider = ({ children }) => {
     const updateBudget = (cat, amt) => setData(prev => ({ ...prev, budget: { ...prev.budget, [cat]: Number(amt) } }));
     const updateUser = async (u) => {
         const token = localStorage.getItem('sb-token');
-        try {
-            const sanitizedName = u.name ? sanitizeText(u.name, 50) : data.user.name;
-            const updatedUser = {
-                ...data.user,
-                ...u,
-                name: sanitizedName,
-                monthlySpendingLimit: u.monthlySpendingLimit === undefined ? data.user.monthlySpendingLimit : (u.monthlySpendingLimit === null ? null : Number(u.monthlySpendingLimit)),
-                categoryBudget: u.categoryBudget || data.user.categoryBudget
-            };
-            setData(prev => ({ ...prev, user: updatedUser }));
+        const sanitizedName = u.name ? sanitizeText(u.name, 50) : data.user.name;
+        const updatedUser = {
+            ...data.user,
+            ...u,
+            name: sanitizedName,
+            monthlySpendingLimit: u.monthlySpendingLimit === undefined ? data.user.monthlySpendingLimit : (u.monthlySpendingLimit === null ? null : Number(u.monthlySpendingLimit)),
+            categoryBudget: u.categoryBudget || data.user.categoryBudget
+        };
+        setData(prev => ({ ...prev, user: updatedUser }));
 
-            if (SUPABASE_URL && SUPABASE_KEY && token) {
-                const payload = parseJWT(token);
-                const currentUserId = payload.sub || data.user.id;
+        if (SUPABASE_URL && SUPABASE_KEY && token) {
+            const payload = parseJWT(token);
+            const currentUserId = payload.sub || data.user.id;
 
-                await supabaseFetch(`profiles?id=eq.${currentUserId}`, {
-                    method: 'PATCH',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({
-                        name: updatedUser.name,
-                        monthly_spending_limit: updatedUser.monthlySpendingLimit,
-                        avatar_url: updatedUser.avatar,
-                        category_budget: updatedUser.categoryBudget
-                    })
-                });
-            }
-        } catch (err) {
-            console.error('Update profile error:', err.message);
-            // Optionally revert local state or show user feedback
+            await supabaseFetch(`profiles?id=eq.${currentUserId}`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({
+                    name: updatedUser.name,
+                    monthly_spending_limit: updatedUser.monthlySpendingLimit,
+                    category_budget: updatedUser.categoryBudget
+                })
+            });
         }
     };
     const markNotificationRead = (id) => setData(prev => ({ ...prev, notifications: prev.notifications.map(n => n.id === id ? { ...n, read: true } : n) }));
