@@ -50,7 +50,7 @@ const Dashboard = () => {
 
     const transactions = data?.transactions || [];
     const user = data?.user;
-    const budget = user?.categoryBudgets || {};
+    const budget = user?.categoryBudget || {};
 
     // Calculate current month expenses
     const now = new Date();

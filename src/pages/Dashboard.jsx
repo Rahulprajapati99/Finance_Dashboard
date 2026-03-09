@@ -55,7 +55,7 @@ const Dashboard = () => {
     if (isLoading || !data) return <div style={{ padding: '2rem' }}>Loading...</div>;
 
     const { transactions, user } = data;
-    const budget = user?.categoryBudgets || {};
+    const budget = user?.categoryBudget || {};
 
     // Calculate current month expenses
     const now = new Date();
