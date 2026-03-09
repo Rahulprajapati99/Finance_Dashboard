@@ -8,7 +8,7 @@ const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 // SSR-safe default prevents crash during Next.js prerendering
 const defaultContextValue = {
     data: {
-        user: { id: 'u1', name: 'User', monthlySpendingLimit: 5000, avatar: null },
+        user: { id: 'u1', name: 'User', monthlySpendingLimit: null, avatar: null },
         transactions: [],
         goals: [],
         budget: { Investment: 0, Travelling: 0, 'Food & Grocery': 0, Entertainment: 0, Healthcare: 0, Others: 0 },
@@ -160,10 +160,21 @@ export const DataProvider = ({ children }) => {
                     user: {
                         id: userId,
                         name: userProfile?.name || fullName,
-                        monthlySpendingLimit: Number(userProfile?.monthly_spending_limit) || 5000,
+                        monthlySpendingLimit: userProfile?.monthly_spending_limit || null,
+                        categoryBudgets: userProfile?.category_budgets || {
+                            'Food & Grocery': 0,
+                            'Transport': 0,
+                            'Bills & Utilities': 0,
+                            'Entertainment': 0,
+                            'Healthcare': 0,
+                            'Others': 0
+                        },
                         avatar: metadata.avatar_url || null
                     },
-                    transactions: txData || prev.transactions,
+                    transactions: (txData || []).map(t => ({
+                        ...t,
+                        date: t.date || t.created_at
+                    })),
                     // Map snake_case from DB to camelCase for frontend
                     goals: (goalsData || []).map(g => ({
                         id: g.id,
@@ -203,18 +214,25 @@ export const DataProvider = ({ children }) => {
 
     const addTransaction = async (tx) => {
         const token = localStorage.getItem('sb-token');
-        const newTx = { ...tx, id: uuidv4() };
-        setData(prev => ({ ...prev, transactions: [newTx, ...prev.transactions] }));
-        if (SUPABASE_URL && SUPABASE_KEY && token) {
-            try {
+        try {
+            const sanitizedTx = {
+                ...tx,
+                recipientName: tx.recipientName ? sanitizeText(tx.recipientName, 100) : '',
+                notes: tx.notes ? sanitizeText(tx.notes, 500) : '',
+                date: tx.date || new Date().toISOString()
+            };
+            const newTx = { ...sanitizedTx, id: uuidv4() };
+            setData(prev => ({ ...prev, transactions: [newTx, ...prev.transactions] }));
+            if (SUPABASE_URL && SUPABASE_KEY && token) {
                 await supabaseFetch('transactions', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(newTx)
                 });
-            } catch (err) {
-                console.error('Insert error:', err.message);
             }
+        } catch (err) {
+            console.error('Add transaction error:', err.message);
+            // Optionally revert local state or show user feedback
         }
     };
 
@@ -233,25 +251,37 @@ export const DataProvider = ({ children }) => {
 
     const editTransaction = async (updatedTx) => {
         const token = localStorage.getItem('sb-token');
-        setData(prev => ({ ...prev, transactions: prev.transactions.map(t => t.id === updatedTx.id ? { ...t, ...updatedTx } : t) }));
-        if (SUPABASE_URL && SUPABASE_KEY && token) {
-            try {
-                await supabaseFetch(`transactions?id=eq.${updatedTx.id}`, {
+        try {
+            const sanitizedTx = {
+                ...updatedTx,
+                recipientName: updatedTx.recipientName ? sanitizeText(updatedTx.recipientName, 100) : '',
+                notes: updatedTx.notes ? sanitizeText(updatedTx.notes, 500) : ''
+            };
+            setData(prev => ({ ...prev, transactions: prev.transactions.map(t => t.id === sanitizedTx.id ? { ...t, ...sanitizedTx } : t) }));
+            if (SUPABASE_URL && SUPABASE_KEY && token) {
+                await supabaseFetch(`transactions?id=eq.${sanitizedTx.id}`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(updatedTx)
+                    body: JSON.stringify(sanitizedTx)
                 });
-            } catch (err) { console.error('Update error:', err.message); }
+            }
+        } catch (err) {
+            console.error('Update transaction error:', err.message);
+            // Optionally revert local state or show user feedback
         }
     };
 
     const addGoal = async (goal) => {
         const token = localStorage.getItem('sb-token');
-        const newGoal = { ...goal, id: uuidv4() };
-        setData(prev => ({ ...prev, goals: [...prev.goals, newGoal] }));
+        try {
+            const sanitizedGoal = {
+                ...goal,
+                name: sanitizeText(goal.name, 100)
+            };
+            const newGoal = { ...sanitizedGoal, id: uuidv4() };
+            setData(prev => ({ ...prev, goals: [...prev.goals, newGoal] }));
 
-        if (SUPABASE_URL && SUPABASE_KEY && token) {
-            try {
+            if (SUPABASE_URL && SUPABASE_KEY && token) {
                 await supabaseFetch('goals', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
@@ -263,27 +293,37 @@ export const DataProvider = ({ children }) => {
                         target_date: newGoal.targetDate
                     })
                 });
-            } catch (err) { console.error('Insert goal error:', err.message); }
+            }
+        } catch (err) {
+            console.error('Insert goal error:', err.message);
+            // Optionally revert local state or show user feedback
         }
     };
 
     const updateGoal = async (g) => {
         const token = localStorage.getItem('sb-token');
-        setData(prev => ({ ...prev, goals: prev.goals.map(x => x.id === g.id ? g : x) }));
+        try {
+            const sanitizedGoal = {
+                ...g,
+                name: sanitizeText(g.name, 100)
+            };
+            setData(prev => ({ ...prev, goals: prev.goals.map(x => x.id === sanitizedGoal.id ? sanitizedGoal : x) }));
 
-        if (SUPABASE_URL && SUPABASE_KEY && token) {
-            try {
-                await supabaseFetch(`goals?id=eq.${g.id}`, {
+            if (SUPABASE_URL && SUPABASE_KEY && token) {
+                await supabaseFetch(`goals?id=eq.${sanitizedGoal.id}`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({
-                        name: g.name,
-                        target_amount: g.targetAmount,
-                        current_amount: g.currentAmount,
-                        target_date: g.targetDate
+                        name: sanitizedGoal.name,
+                        target_amount: sanitizedGoal.targetAmount,
+                        current_amount: sanitizedGoal.currentAmount,
+                        target_date: sanitizedGoal.targetDate
                     })
                 });
-            } catch (err) { console.error('Update goal error:', err.message); }
+            }
+        } catch (err) {
+            console.error('Update goal error:', err.message);
+            // Optionally revert local state or show user feedback
         }
     };
 
@@ -302,21 +342,32 @@ export const DataProvider = ({ children }) => {
     const updateBudget = (cat, amt) => setData(prev => ({ ...prev, budget: { ...prev.budget, [cat]: Number(amt) } }));
     const updateUser = async (u) => {
         const token = localStorage.getItem('sb-token');
-        const updatedUser = { ...data.user, ...u };
-        setData(prev => ({ ...prev, user: updatedUser }));
+        try {
+            const sanitizedName = u.name ? sanitizeText(u.name, 50) : data.user.name;
+            const updatedUser = {
+                ...data.user,
+                ...u,
+                name: sanitizedName,
+                monthlySpendingLimit: u.monthlySpendingLimit === undefined ? data.user.monthlySpendingLimit : (u.monthlySpendingLimit === null ? null : Number(u.monthlySpendingLimit)),
+                categoryBudgets: u.categoryBudgets || data.user.categoryBudgets
+            };
+            setData(prev => ({ ...prev, user: updatedUser }));
 
-        if (SUPABASE_URL && SUPABASE_KEY && token) {
-            try {
+            if (SUPABASE_URL && SUPABASE_KEY && token) {
                 await supabaseFetch(`profiles?id=eq.${data.user.id}`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({
                         name: updatedUser.name,
-                        monthly_spending_limit: Number(updatedUser.monthlySpendingLimit),
-                        avatar_url: updatedUser.avatar
+                        monthly_spending_limit: updatedUser.monthlySpendingLimit,
+                        avatar_url: updatedUser.avatar,
+                        category_budgets: updatedUser.categoryBudgets
                     })
                 });
-            } catch (err) { console.error('Update profile error:', err.message); }
+            }
+        } catch (err) {
+            console.error('Update profile error:', err.message);
+            // Optionally revert local state or show user feedback
         }
     };
     const markNotificationRead = (id) => setData(prev => ({ ...prev, notifications: prev.notifications.map(n => n.id === id ? { ...n, read: true } : n) }));

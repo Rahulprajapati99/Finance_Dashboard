@@ -17,20 +17,26 @@ const Analytics = () => {
         const categories = {};
         const now = new Date();
 
-        // Initialize last 7 days
+        // Initialize last 7 days with stable keys (YYYY-MM-DD)
         for (let i = 6; i >= 0; i--) {
             const d = new Date();
             d.setDate(now.getDate() - i);
-            dailyData[d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })] = { income: 0, expense: 0 };
+            const key = d.toISOString().split('T')[0];
+            dailyData[key] = {
+                income: 0,
+                expense: 0,
+                label: d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+            };
         }
 
         transactions.forEach(t => {
-            const dateStr = new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            const txDate = new Date(t.date);
+            const key = txDate.toISOString().split('T')[0];
             const amount = Number(t.amount) || 0;
 
-            if (dailyData[dateStr] !== undefined) {
-                if (t.type === 'income') dailyData[dateStr].income += amount;
-                else dailyData[dateStr].expense += amount;
+            if (dailyData[key] !== undefined) {
+                if (t.type === 'income') dailyData[key].income += amount;
+                else dailyData[key].expense += amount;
             }
 
             if (t.type === 'expense') {
@@ -38,9 +44,10 @@ const Analytics = () => {
             }
         });
 
-        const labels = Object.keys(dailyData);
-        const incomeTrend = labels.map(l => dailyData[l].income);
-        const expenseTrend = labels.map(l => dailyData[l].expense);
+        const keys = Object.keys(dailyData).sort();
+        const labels = keys.map(k => dailyData[k].label);
+        const incomeTrend = keys.map(k => dailyData[k].income);
+        const expenseTrend = keys.map(k => dailyData[k].expense);
 
         return { labels, incomeTrend, expenseTrend, categories };
     }, [transactions]);

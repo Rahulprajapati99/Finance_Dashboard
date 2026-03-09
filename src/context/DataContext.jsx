@@ -21,7 +21,20 @@ function parseJWT(token) {
 
 export const DataProvider = ({ children }) => {
     const [data, setData] = useState({
-        user: { id: 'u1', name: 'User', monthlySpendingLimit: 5000, avatar: null },
+        user: {
+            id: 'u1',
+            name: 'User',
+            monthlySpendingLimit: null,
+            categoryBudgets: {
+                'Food & Grocery': 0,
+                'Transport': 0,
+                'Bills & Utilities': 0,
+                'Entertainment': 0,
+                'Healthcare': 0,
+                'Others': 0
+            },
+            avatar: null
+        },
         transactions: [],
         cards: [],
         goals: [],
@@ -76,16 +89,51 @@ export const DataProvider = ({ children }) => {
         }
     }, [data, isLoading]);
 
-    const addTransaction = (tx) => setData(prev => ({ ...prev, transactions: [{ id: uuidv4(), date: new Date().toISOString(), ...tx }, ...prev.transactions] }));
+    const addTransaction = (tx) => {
+        const sanitizedTx = {
+            ...tx,
+            recipientName: sanitizeText(tx.recipientName, 100),
+            notes: sanitizeText(tx.notes, 500),
+            amount: Number(tx.amount)
+        };
+        setData(prev => ({
+            ...prev,
+            transactions: [
+                { ...sanitizedTx, id: uuidv4(), date: new Date().toISOString() },
+                ...prev.transactions
+            ]
+        }));
+    };
     const deleteTransaction = (id) => setData(prev => ({ ...prev, transactions: prev.transactions.filter(t => t.id !== id) }));
     const editTransaction = (updatedTx) => setData(prev => ({ ...prev, transactions: prev.transactions.map(t => t.id === updatedTx.id ? { ...t, ...updatedTx } : t) }));
     const addCard = (card) => setData(prev => ({ ...prev, cards: [...prev.cards, { id: uuidv4(), ...card }] }));
     const deleteCard = (id) => setData(prev => ({ ...prev, cards: prev.cards.filter(c => c.id !== id) }));
-    const addGoal = (goal) => setData(prev => ({ ...prev, goals: [...prev.goals, { id: uuidv4(), ...goal }] }));
+    const addGoal = (goal) => {
+        const sanitizedGoal = {
+            ...goal,
+            name: sanitizeText(goal.name, 100),
+            targetAmount: Number(goal.targetAmount),
+            currentAmount: Number(goal.currentAmount)
+        };
+        setData(prev => ({
+            ...prev,
+            goals: [...prev.goals, { ...sanitizedGoal, id: uuidv4() }]
+        }));
+    };
     const updateGoal = (updatedGoal) => setData(prev => ({ ...prev, goals: prev.goals.map(g => g.id === updatedGoal.id ? updatedGoal : g) }));
     const deleteGoal = (id) => setData(prev => ({ ...prev, goals: prev.goals.filter(g => g.id !== id) }));
     const updateBudget = (category, amount) => setData(prev => ({ ...prev, budget: { ...prev.budget, [category]: Number(amount) } }));
-    const updateUser = (userData) => setData(prev => ({ ...prev, user: { ...prev.user, ...userData } }));
+    const updateUser = (u) => {
+        const sanitizedName = u.name ? sanitizeText(u.name, 100) : data.user.name;
+        const updatedUser = {
+            ...data.user,
+            ...u,
+            name: sanitizedName,
+            monthlySpendingLimit: u.monthlySpendingLimit === undefined ? data.user.monthlySpendingLimit : (u.monthlySpendingLimit === null ? null : Number(u.monthlySpendingLimit)),
+            categoryBudgets: u.categoryBudgets || data.user.categoryBudgets
+        };
+        setData(prev => ({ ...prev, user: updatedUser }));
+    };
     const markNotificationRead = (id) => setData(prev => ({ ...prev, notifications: prev.notifications.map(n => n.id === id ? { ...n, read: true } : n) }));
     const clearAllNotifications = () => setData(prev => ({ ...prev, notifications: [] }));
     const resetData = () => { localStorage.removeItem('finance_db'); localStorage.removeItem('sb-token'); window.location.reload(); };

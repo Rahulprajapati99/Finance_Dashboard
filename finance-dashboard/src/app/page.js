@@ -48,8 +48,8 @@ const Dashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const transactions = data?.transactions || [];
-    const budget = data?.budget || {};
     const user = data?.user;
+    const budget = user?.categoryBudgets || {};
 
     // Calculate current month expenses
     const now = new Date();
@@ -62,9 +62,9 @@ const Dashboard = () => {
         .filter(tx => tx.type === 'expense')
         .reduce((acc, tx) => acc + (Number(tx.amount) || 0), 0);
 
-    const spendingLimit = user?.monthlySpendingLimit || 5000;
-    const budgetUsagePercent = Math.min((currentMonthExpense / spendingLimit) * 100, 100);
-    const isOverLimit = currentMonthExpense > spendingLimit;
+    const spendingLimit = user?.monthlySpendingLimit || 0;
+    const budgetUsagePercent = spendingLimit > 0 ? Math.min((currentMonthExpense / spendingLimit) * 100, 100) : 0;
+    const isOverLimit = spendingLimit > 0 && currentMonthExpense > spendingLimit;
 
     const totalBalance = totalIncome - totalExpense;
 
@@ -78,10 +78,12 @@ const Dashboard = () => {
         }]
     };
 
+    const hasBudgets = Object.values(budget).some(v => v > 0);
+
     const budgetData = {
-        labels: Object.keys(budget),
+        labels: Object.keys(budget).filter(cat => budget[cat] > 0),
         datasets: [{
-            data: Object.values(budget),
+            data: Object.values(budget).filter(v => v > 0),
             backgroundColor: ['#2E3A8C', '#4A5FD9', '#FF9800', '#4CAF50', '#E91E63', '#9C27B0'],
             borderWidth: 0
         }]
@@ -162,9 +164,15 @@ const Dashboard = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                     <div>
                         <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>Monthly Budget Health</h4>
-                        <p style={{ margin: '4px 0 0', fontSize: '14px', color: 'var(--color-text-body)' }}>
-                            You've spent <strong>${currentMonthExpense.toLocaleString()}</strong> of your <strong>${spendingLimit.toLocaleString()}</strong> limit for {now.toLocaleString('default', { month: 'long' })}.
-                        </p>
+                        {spendingLimit > 0 ? (
+                            <p style={{ margin: '4px 0 0', fontSize: '14px', color: 'var(--color-text-body)' }}>
+                                You've spent <strong>${currentMonthExpense.toLocaleString()}</strong> of your <strong>${spendingLimit.toLocaleString()}</strong> limit for {now.toLocaleString('default', { month: 'long' })}.
+                            </p>
+                        ) : (
+                            <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#9CA3AF' }}>
+                                Set a monthly spending limit in <a href="/settings" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>Settings</a> to track your budget health.
+                            </p>
+                        )}
                     </div>
                     {isOverLimit && (
                         <span style={{
@@ -179,20 +187,22 @@ const Dashboard = () => {
                         </span>
                     )}
                 </div>
-                <div style={{
-                    width: '100%',
-                    height: '10px',
-                    backgroundColor: '#F3F4F6',
-                    borderRadius: '5px',
-                    overflow: 'hidden'
-                }}>
+                {spendingLimit > 0 && (
                     <div style={{
-                        width: `${budgetUsagePercent}%`,
-                        height: '100%',
-                        backgroundColor: isOverLimit ? '#EF4444' : budgetUsagePercent > 80 ? '#F59E0B' : '#2E3A8C',
-                        transition: 'width 0.5s ease-in-out'
-                    }} />
-                </div>
+                        width: '100%',
+                        height: '10px',
+                        backgroundColor: '#F3F4F6',
+                        borderRadius: '5px',
+                        overflow: 'hidden'
+                    }}>
+                        <div style={{
+                            width: `${budgetUsagePercent}%`,
+                            height: '100%',
+                            backgroundColor: isOverLimit ? '#EF4444' : budgetUsagePercent > 80 ? '#F59E0B' : '#2E3A8C',
+                            transition: 'width 0.5s ease-in-out'
+                        }} />
+                    </div>
+                )}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
@@ -203,11 +213,11 @@ const Dashboard = () => {
                     </div>
                 </div>
                 <div style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)', height: '400px' }}>
-                    <h3 style={{ marginBottom: '1.5rem', fontSize: '18px' }}>Budget</h3>
+                    <h3 style={{ marginBottom: '1.5rem', fontSize: '18px' }}>Category Budgets</h3>
                     <div style={{ height: '250px', display: 'flex', justifyContent: 'center' }}>
-                        {Object.keys(budget).length > 0
+                        {hasBudgets
                             ? <Doughnut data={budgetData} options={{ maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }} />
-                            : <p style={{ color: '#9CA3AF', alignSelf: 'center' }}>No budget data set yet.</p>
+                            : <p style={{ color: '#9CA3AF', alignSelf: 'center', textAlign: 'center' }}>No category budgets set yet.<br /><a href="/settings" style={{ color: 'var(--color-primary)', fontSize: '14px' }}>Set budgets in Settings</a></p>
                         }
                     </div>
                 </div>

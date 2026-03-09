@@ -1,7 +1,5 @@
 "use client";
 
-
-
 import React, { useState } from 'react';
 import { useData } from '@/context/DataContext';
 import { Search, Filter, Plus, ArrowUpRight, ArrowDownRight } from 'lucide-react';
@@ -54,6 +52,7 @@ const Transactions = () => {
                             placeholder="Search by name or category..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
+                            maxLength={100}
                             style={{
                                 padding: '10px 10px 10px 40px',
                                 borderRadius: '8px',
@@ -105,7 +104,7 @@ const Transactions = () => {
                                 <td style={{ padding: '1rem', fontWeight: 500 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                         <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 600 }}>
-                                            {t.recipientName.charAt(0)}
+                                            {t.recipientName ? t.recipientName.charAt(0) : 'T'}
                                         </div>
                                         {t.recipientName}
                                     </div>
@@ -126,7 +125,7 @@ const Transactions = () => {
                                         backgroundColor: t.status === 'completed' ? '#DEF7EC' : t.status === 'failed' ? '#FDE8E8' : '#FEF3C7',
                                         color: t.status === 'completed' ? '#03543F' : t.status === 'failed' ? '#9B1C1C' : '#92400E'
                                     }}>
-                                        {t.status.charAt(0).toUpperCase() + t.status.slice(1)}
+                                        {t.status ? (t.status.charAt(0).toUpperCase() + t.status.slice(1)) : 'Completed'}
                                     </span>
                                 </td>
                             </tr>

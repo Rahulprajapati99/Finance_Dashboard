@@ -11,15 +11,36 @@ const AddTransactionModal = ({ isOpen, onClose }) => {
         recipientName: '',
         notes: ''
     });
+    const [error, setError] = useState('');
 
     if (!isOpen) return null;
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        setError('');
+
+        const amountNum = Number(formData.amount);
+        if (isNaN(amountNum) || amountNum <= 0) {
+            setError('Please enter a valid amount greater than 0.');
+            return;
+        }
+
+        if (!formData.recipientName.trim()) {
+            setError('Recipient/Payer name is required.');
+            return;
+        }
+
+        if (formData.recipientName.length > 100) {
+            setError('Name is too long (max 100 characters).');
+            return;
+        }
+
         addTransaction({
             ...formData,
+            recipientName: formData.recipientName.trim(),
+            notes: (formData.notes || '').trim(),
             status: 'completed',
-            amount: Number(formData.amount)
+            amount: amountNum
         });
         setFormData({ amount: '', type: 'expense', category: 'Food & Grocery', recipientName: '', notes: '' });
         onClose();
@@ -62,6 +83,21 @@ const AddTransactionModal = ({ isOpen, onClose }) => {
                 </button>
 
                 <h2 style={{ marginBottom: '1.5rem', color: 'var(--color-text-main)' }}>Add Transaction</h2>
+
+                {error && (
+                    <div style={{
+                        backgroundColor: '#FEE2E2',
+                        color: '#B91C1C',
+                        padding: '10px',
+                        borderRadius: 'var(--radius-md)',
+                        marginBottom: '1rem',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        border: '1px solid #FECACA'
+                    }}>
+                        {error}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem' }}>
                     <div>

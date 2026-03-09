@@ -11,15 +11,46 @@ const AddGoalModal = ({ isOpen, onClose }) => {
         currentAmount: '0',
         targetDate: ''
     });
+    const [error, setError] = useState('');
 
     if (!isOpen) return null;
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        setError('');
+
+        if (!formData.name.trim()) {
+            setError('Goal name is required.');
+            return;
+        }
+
+        if (formData.name.length > 50) {
+            setError('Goal name is too long (max 50 characters).');
+            return;
+        }
+
+        const target = Number(formData.targetAmount);
+        if (isNaN(target) || target <= 0) {
+            setError('Target amount must be greater than 0.');
+            return;
+        }
+
+        const current = Number(formData.currentAmount);
+        if (isNaN(current) || current < 0) {
+            setError('Initial savings cannot be negative.');
+            return;
+        }
+
+        if (!formData.targetDate) {
+            setError('Target date is required.');
+            return;
+        }
+
         addGoal({
             ...formData,
-            targetAmount: Number(formData.targetAmount),
-            currentAmount: Number(formData.currentAmount)
+            name: formData.name.trim(),
+            targetAmount: target,
+            currentAmount: current
         });
         setFormData({ name: '', targetAmount: '', currentAmount: '0', targetDate: '' });
         onClose();
@@ -62,6 +93,21 @@ const AddGoalModal = ({ isOpen, onClose }) => {
                 </button>
 
                 <h2 style={{ marginBottom: '1.5rem', color: 'var(--color-text-main)' }}>Add Savings Goal</h2>
+
+                {error && (
+                    <div style={{
+                        backgroundColor: '#FEE2E2',
+                        color: '#B91C1C',
+                        padding: '10px',
+                        borderRadius: 'var(--radius-md)',
+                        marginBottom: '1rem',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        border: '1px solid #FECACA'
+                    }}>
+                        {error}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem' }}>
                     <div>

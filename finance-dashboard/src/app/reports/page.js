@@ -17,7 +17,7 @@ const Reports = () => {
         const currentYear = currentDate.getFullYear();
 
         const monthlyTx = transactions.filter(tx => {
-            const txDate = new Date(tx.date || tx.createdAt);
+            const txDate = new Date(tx.date || tx.created_at);
             return txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear;
         });
 
@@ -52,8 +52,9 @@ const Reports = () => {
         const tableRows = [];
 
         monthlyTx.forEach(tx => {
+            const txDateString = new Date(tx.date || tx.created_at).toLocaleDateString();
             const txData = [
-                new Date(tx.date || tx.createdAt).toLocaleDateString(),
+                txDateString,
                 tx.category,
                 tx.recipientName,
                 tx.type.charAt(0).toUpperCase() + tx.type.slice(1),
@@ -77,12 +78,12 @@ const Reports = () => {
         const currentYear = new Date().getFullYear();
 
         const annualTx = transactions.filter(tx => {
-            const txDate = new Date(tx.date || tx.createdAt);
+            const txDate = new Date(tx.date || tx.created_at);
             return txDate.getFullYear() === currentYear;
         });
 
         const csvData = annualTx.map(tx => ({
-            "Date": new Date(tx.date || tx.createdAt).toLocaleDateString(),
+            "Date": new Date(tx.date || tx.created_at).toLocaleDateString(),
             "Category": tx.category,
             "Recipient/Source": tx.recipientName,
             "Type": tx.type.charAt(0).toUpperCase() + tx.type.slice(1),
