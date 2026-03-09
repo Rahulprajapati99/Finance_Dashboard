@@ -5,6 +5,20 @@ const DataContext = createContext();
 
 export const useData = () => useContext(DataContext);
 
+function parseJWT(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        console.error('JWT parse error:', e);
+        return {};
+    }
+}
+
 export const DataProvider = ({ children }) => {
     const [data, setData] = useState({
         user: { id: 'u1', name: 'User', monthlySpendingLimit: 5000, avatar: null },
@@ -32,8 +46,7 @@ export const DataProvider = ({ children }) => {
             if (token) {
                 try {
                     // Extract name from token (same logic as Next.js version)
-                    const payloadStr = token.split('.')[1];
-                    const payload = JSON.parse(atob(payloadStr));
+                    const payload = parseJWT(token);
                     const metadata = payload.user_metadata || payload.raw_user_meta_data || {};
                     const fullName = metadata.full_name ||
                         metadata.name ||

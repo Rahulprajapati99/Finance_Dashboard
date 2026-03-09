@@ -56,6 +56,20 @@ async function supabaseFetch(path, options = {}) {
     return res.status === 204 ? null : res.json();
 }
 
+function parseJWT(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        console.error('JWT parse error:', e);
+        return {};
+    }
+}
+
 export const DataProvider = ({ children }) => {
     const [data, setData] = useState(defaultContextValue.data);
     const [isLoading, setIsLoading] = useState(true);
@@ -98,8 +112,7 @@ export const DataProvider = ({ children }) => {
         if (SUPABASE_URL && SUPABASE_KEY && token) {
             try {
                 // Decode token to get user metadata (name/email)
-                const payloadStr = token.split('.')[1];
-                const payload = JSON.parse(atob(payloadStr));
+                const payload = parseJWT(token);
                 const userId = payload.sub;
                 const metadata = payload.user_metadata || payload.raw_user_meta_data || {};
                 const fullName = metadata.full_name ||
