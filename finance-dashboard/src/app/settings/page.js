@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useData } from '@/context/DataContext';
 import { useTheme } from '@/context/ThemeContext';
-import { User, Shield, Bell, Moon, Sun, Trash2, Save } from 'lucide-react';
+import { User, Shield, Bell, Moon, Sun, Trash2, Save, DollarSign } from 'lucide-react';
 
 const Section = ({ title, icon: Icon, children }) => (
     <div style={{
@@ -31,57 +31,39 @@ const Section = ({ title, icon: Icon, children }) => (
 const Settings = () => {
     const { data, updateUser, resetData } = useData();
     const { isDarkMode, toggleTheme } = useTheme();
-    const [name, setName] = useState(data?.user?.name || '');
     const [limit, setLimit] = useState(data?.user?.monthlySpendingLimit || '');
     const [error, setError] = useState('');
     const [catBudget, setCatBudget] = useState(data?.user?.categoryBudget || {});
 
-    // Sync local state when context data changes (e.g. after sync from Supabase)
     useEffect(() => {
         if (data?.user) {
-            setName(data.user.name || '');
             setLimit(data.user.monthlySpendingLimit === null ? '' : data.user.monthlySpendingLimit);
             setCatBudget(data.user.categoryBudget || {});
         }
-    }, [data?.user?.name, data?.user?.monthlySpendingLimit, data?.user?.categoryBudget]);
+    }, [data?.user?.monthlySpendingLimit, data?.user?.categoryBudget]);
 
-    const handleSaveProfile = async () => {
+    const handleSaveLimit = async () => {
         setError('');
-
-        if (!name.trim()) {
-            setError('Display name is required.');
-            return;
-        }
-        if (name.length > 50) {
-            setError('Display name must be under 50 characters.');
-            return;
-        }
         if (limit !== '' && (isNaN(limit) || Number(limit) < 0)) {
             setError('Monthly spending limit must be a positive number.');
             return;
         }
-
         try {
             await updateUser({
-                name: name.trim(),
                 monthlySpendingLimit: limit === '' ? null : Number(limit)
             });
-            alert('Profile updated successfully!');
+            alert('Monthly spending limit updated!');
         } catch (err) {
-            setError('Failed to save profile: ' + err.message);
-            alert('Error saving profile: ' + err.message);
+            setError('Failed to save: ' + err.message);
         }
     };
 
     const handleSaveBudget = async () => {
         try {
-            await updateUser({
-                categoryBudget: catBudget
-            });
+            await updateUser({ categoryBudget: catBudget });
             alert('Budget updated successfully!');
         } catch (err) {
             setError('Failed to save budget: ' + err.message);
-            alert('Error saving budget: ' + err.message);
         }
     };
 
@@ -97,8 +79,6 @@ const Settings = () => {
             }
         }
     };
-
-
 
     return (
         <div style={{ paddingBottom: '2rem', maxWidth: '800px', margin: '0 auto' }}>
@@ -119,66 +99,95 @@ const Settings = () => {
                 </div>
             )}
 
-            <Section title="Profile Settings" icon={User}>
-                <div style={{ display: 'grid', gap: '1.5rem' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Display Name</label>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    padding: '12px',
-                                    borderRadius: 'var(--radius-md)',
-                                    border: '1px solid var(--color-border)',
-                                    background: 'var(--color-bg-light)',
-                                    color: 'var(--color-text-main)'
-                                }}
-                            />
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Overall Monthly Limit ($)</label>
-                            <input
-                                type="number"
-                                value={limit}
-                                onChange={(e) => setLimit(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    padding: '12px',
-                                    borderRadius: 'var(--radius-md)',
-                                    border: '1px solid var(--color-border)',
-                                    background: 'var(--color-bg-light)',
-                                    color: 'var(--color-text-main)'
-                                }}
-                                placeholder="e.g. 5000"
-                            />
-                        </div>
+            {/* Profile - Read Only */}
+            <Section title="Profile" icon={User}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Display Name</label>
+                        <input
+                            type="text"
+                            value={data?.user?.name || ''}
+                            disabled
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                borderRadius: 'var(--radius-md)',
+                                border: '1px solid var(--color-border)',
+                                background: '#f0f0f0',
+                                color: '#666',
+                                cursor: 'not-allowed'
+                            }}
+                        />
+                        <p style={{ fontSize: '12px', color: 'var(--color-text-body)', marginTop: '4px' }}>
+                            Automatically set from your Google account.
+                        </p>
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Email</label>
+                        <input
+                            type="text"
+                            value={data?.user?.email || '—'}
+                            disabled
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                borderRadius: 'var(--radius-md)',
+                                border: '1px solid var(--color-border)',
+                                background: '#f0f0f0',
+                                color: '#666',
+                                cursor: 'not-allowed'
+                            }}
+                        />
                     </div>
                 </div>
-                <div style={{ marginTop: '1.5rem' }}>
+            </Section>
+
+            {/* Monthly Spending Limit */}
+            <Section title="Monthly Spending Limit" icon={DollarSign}>
+                <p style={{ color: 'var(--color-text-body)', fontSize: '14px', marginBottom: '1rem' }}>
+                    Set an overall monthly spending limit. This will be used across the Dashboard and Analytics to track your spending.
+                </p>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem' }}>
+                    <div style={{ flex: 1, maxWidth: '300px' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Limit ($)</label>
+                        <input
+                            type="number"
+                            value={limit}
+                            onChange={(e) => setLimit(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                borderRadius: 'var(--radius-md)',
+                                border: '1px solid var(--color-border)',
+                                background: 'var(--color-bg-light)',
+                                color: 'var(--color-text-main)'
+                            }}
+                            placeholder="e.g. 5000"
+                        />
+                    </div>
                     <button
-                        onClick={handleSaveProfile}
+                        onClick={handleSaveLimit}
                         style={{
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
                             backgroundColor: 'var(--color-primary)',
                             color: 'white',
-                            padding: '10px 20px',
+                            padding: '12px 20px',
                             borderRadius: '8px',
                             fontWeight: 600,
                             cursor: 'pointer',
-                            border: 'none'
+                            border: 'none',
+                            height: '46px'
                         }}
                     >
                         <Save size={18} />
-                        Save Profile
+                        Save Limit
                     </button>
                 </div>
-            </Section >
+            </Section>
 
+            {/* Category Budget */}
             <Section title="Category Budget" icon={Save}>
                 <p style={{ color: 'var(--color-text-body)', fontSize: '14px', marginBottom: '1.5rem' }}>
                     Set individual monthly limits for each spending category. These will show up in your Dashboard graph.
@@ -206,16 +215,10 @@ const Settings = () => {
                     <button
                         onClick={handleSaveBudget}
                         style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            backgroundColor: 'var(--color-primary)',
-                            color: 'white',
-                            padding: '12px 24px',
-                            borderRadius: '8px',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            border: 'none'
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            backgroundColor: 'var(--color-primary)', color: 'white',
+                            padding: '12px 24px', borderRadius: '8px', fontWeight: 600,
+                            cursor: 'pointer', border: 'none'
                         }}
                     >
                         <Save size={18} />
@@ -223,13 +226,14 @@ const Settings = () => {
                     </button>
                     <button
                         onClick={handleResetBudget}
-                        style={{ padding: '12px 20px', background: 'var(--color-bg-light)', border: '1px solid var(--color-border)' }}
+                        style={{ padding: '12px 20px', background: 'var(--color-bg-light)', border: '1px solid var(--color-border)', borderRadius: '8px', cursor: 'pointer' }}
                     >
                         Reset Budget
                     </button>
                 </div>
             </Section>
 
+            {/* App Preferences */}
             <Section title="App Preferences" icon={Bell}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
@@ -239,13 +243,10 @@ const Settings = () => {
                     <button
                         onClick={toggleTheme}
                         style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            padding: '10px 20px',
-                            background: 'var(--color-bg-light)',
-                            color: 'var(--color-text-main)',
-                            border: '1px solid var(--color-border)'
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            padding: '10px 20px', background: 'var(--color-bg-light)',
+                            color: 'var(--color-text-main)', border: '1px solid var(--color-border)',
+                            borderRadius: '8px', cursor: 'pointer'
                         }}
                     >
                         {isDarkMode ? <><Sun size={18} /> Light Mode</> : <><Moon size={18} /> Dark Mode</>}
@@ -253,6 +254,7 @@ const Settings = () => {
                 </div>
             </Section>
 
+            {/* Danger Zone */}
             <Section title="Danger Zone" icon={Shield}>
                 <div>
                     <h4 style={{ marginBottom: '4px', color: '#EF4444' }}>Reset Application</h4>
@@ -266,13 +268,10 @@ const Settings = () => {
                             }
                         }}
                         style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            backgroundColor: '#fee2e2',
-                            color: '#dc2626',
-                            padding: '12px 24px',
-                            border: '1px solid #fecaca'
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            backgroundColor: '#fee2e2', color: '#dc2626',
+                            padding: '12px 24px', border: '1px solid #fecaca',
+                            borderRadius: '8px', cursor: 'pointer'
                         }}
                     >
                         <Trash2 size={18} />
@@ -280,7 +279,7 @@ const Settings = () => {
                     </button>
                 </div>
             </Section>
-        </div >
+        </div>
     );
 };
 

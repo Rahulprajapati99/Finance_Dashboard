@@ -165,6 +165,7 @@ export const DataProvider = ({ children }) => {
                     user: {
                         id: userId,
                         name: userProfile?.name || fullName,
+                        email: payload.email || '',
                         monthlySpendingLimit: userProfile?.monthly_spending_limit || null,
                         categoryBudget: userProfile?.category_budget || {
                             'Food & Grocery': 0,
