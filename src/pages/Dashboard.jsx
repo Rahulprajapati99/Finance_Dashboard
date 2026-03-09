@@ -48,24 +48,14 @@ const MetricCard = ({ title, amount, icon: Icon, trend, type }) => (
 );
 
 const Dashboard = () => {
-    const { data, isLoading } = useData();
+    const { data, isLoading, totalIncome, totalExpense, totalSavings } = useData();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     if (isLoading || !data) return <div style={{ padding: '2rem' }}>Loading...</div>;
 
     const { transactions, budget } = data;
 
-    // Calculate generic totals
-    const totalIncome = transactions
-        .filter(t => t.type === 'income')
-        .reduce((acc, t) => acc + Number(t.amount), 0);
-
-    const totalExpense = transactions
-        .filter(t => t.type === 'expense')
-        .reduce((acc, t) => acc + Number(t.amount), 0);
-
     const totalBalance = totalIncome - totalExpense;
-    const totalSavings = totalIncome - totalExpense; // Simplified logic
 
     // Chart Data Preparation
     const incomeData = {

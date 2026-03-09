@@ -4,7 +4,7 @@ import { Target, Plus, TrendingUp } from 'lucide-react';
 import AddGoalModal from '../components/AddGoalModal';
 
 const Goals = () => {
-    const { data } = useData();
+    const { data, totalSavings } = useData();
     const { goals } = data;
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -34,7 +34,8 @@ const Goals = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.5rem' }}>
                 {goals.map((goal) => {
-                    const percentage = Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100));
+                    const savedAmount = totalSavings + (goal.currentAmount || 0);
+                    const percentage = Math.min(100, Math.round((savedAmount / goal.targetAmount) * 100));
 
                     return (
                         <div key={goal.id} style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)' }}>
@@ -55,7 +56,7 @@ const Goals = () => {
 
                             <div style={{ marginBottom: '1rem' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '8px', fontWeight: 500 }}>
-                                    <span>${goal.currentAmount.toLocaleString()} saved</span>
+                                    <span>${savedAmount.toLocaleString()} saved</span>
                                     <span style={{ color: '#6B7280' }}>of ${goal.targetAmount.toLocaleString()}</span>
                                 </div>
                                 <div style={{ width: '100%', height: '8px', backgroundColor: '#F3F4F6', borderRadius: '4px', overflow: 'hidden' }}>

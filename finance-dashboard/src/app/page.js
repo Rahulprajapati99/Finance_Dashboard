@@ -44,37 +44,20 @@ const MetricCard = ({ title, amount, icon: Icon, trend, type }) => (
 );
 
 const Dashboard = () => {
-    const { data } = useData();
+    const { data, totalIncome, totalExpense, totalSavings } = useData();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const transactions = data?.transactions || [];
     const budget = data?.budget || {};
     const user = data?.user;
 
-    // Use useMemo for calculations to keep the render function clean
-    const totals = useMemo(() => {
-        let income = 0;
-        let expense = 0;
-
-        transactions.forEach(t => {
-            const amt = Number(t.amount) || 0;
-            if (t.type === 'income') income += amt;
-            else if (t.type === 'expense') expense += amt;
-        });
-
-        return {
-            totalIncome: income,
-            totalExpense: expense,
-            totalBalance: income - expense,
-            totalSavings: income - expense
-        };
-    }, [transactions]);
+    const totalBalance = totalIncome - totalExpense;
 
     const incomeData = {
         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
         datasets: [{
             label: 'Income',
-            data: [3000, 3200, 4500, 4200, 4800, totals.totalIncome > 0 ? totals.totalIncome : 5000],
+            data: [3000, 3200, 4500, 4200, 4800, totalIncome > 0 ? totalIncome : 5000],
             backgroundColor: '#2E3A8C',
             borderRadius: 4
         }]
@@ -128,10 +111,10 @@ const Dashboard = () => {
             <AddTransactionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
-                <MetricCard title="Total Balance" amount={totals.totalBalance} icon={Wallet} trend={12.5} type="neutral" />
-                <MetricCard title="Total Income" amount={totals.totalIncome} icon={ArrowDownRight} trend={8.2} type="income" />
-                <MetricCard title="Total Expense" amount={totals.totalExpense} icon={ArrowUpRight} trend={-2.4} type="expense" />
-                <MetricCard title="Total Savings" amount={totals.totalSavings} icon={PiggyBank} trend={5.3} type="neutral" />
+                <MetricCard title="Total Balance" amount={totalBalance} icon={Wallet} trend={12.5} type="neutral" />
+                <MetricCard title="Total Income" amount={totalIncome} icon={ArrowDownRight} trend={8.2} type="income" />
+                <MetricCard title="Total Expense" amount={totalExpense} icon={ArrowUpRight} trend={-2.4} type="expense" />
+                <MetricCard title="Total Savings" amount={totalSavings} icon={PiggyBank} trend={5.3} type="neutral" />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>

@@ -25,7 +25,11 @@ const defaultContextValue = {
     updateUser: () => { },
     markNotificationRead: () => { },
     clearAllNotifications: () => { },
-    resetData: () => { }
+    resetData: () => { },
+    logout: () => { },
+    totalIncome: 0,
+    totalExpense: 0,
+    totalSavings: 0
 };
 
 const DataContext = createContext(defaultContextValue);
@@ -112,7 +116,7 @@ export const DataProvider = ({ children }) => {
                         id: g.id,
                         name: g.name,
                         targetAmount: Number(g.target_amount),
-                        currentAmount: Number(g.current_amount),
+                        currentAmount: Number(g.current_amount), // Fix: ensure this is mapped correctly
                         targetDate: g.target_date
                     }))
                 }));
@@ -247,6 +251,17 @@ export const DataProvider = ({ children }) => {
     const clearAllNotifications = () => setData(prev => ({ ...prev, notifications: [] }));
     const resetData = () => { localStorage.removeItem('finance_db'); window.location.reload(); };
 
+    // Computed Values
+    const totalIncome = data.transactions
+        .filter(t => t.type === 'income')
+        .reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+
+    const totalExpense = data.transactions
+        .filter(t => t.type === 'expense')
+        .reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+
+    const totalSavings = totalIncome - totalExpense;
+
     return (
         <DataContext.Provider value={{
             data, isLoading,
@@ -254,7 +269,8 @@ export const DataProvider = ({ children }) => {
             addGoal, updateGoal, deleteGoal,
             updateBudget, updateUser,
             markNotificationRead, clearAllNotifications, resetData,
-            logout
+            logout,
+            totalIncome, totalExpense, totalSavings
         }}>
             {children}
         </DataContext.Provider>
