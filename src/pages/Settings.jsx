@@ -26,17 +26,30 @@ const Section = ({ title, icon: Icon, children }) => (
     </div>
 );
 
+const DEFAULT_CATEGORIES = {
+    'Food & Grocery': 0,
+    'Transport': 0,
+    'Bills & Utilities': 0,
+    'Entertainment': 0,
+    'Healthcare': 0,
+    'Others': 0
+};
+
 const Settings = () => {
     const { data, updateUser, resetData } = useData();
     const { isDarkMode, toggleTheme } = useTheme();
     const [limit, setLimit] = useState(data?.user?.monthlySpendingLimit || '');
     const [error, setError] = useState('');
-    const [catBudget, setCatBudget] = useState(data?.user?.categoryBudget || {});
+    const [catBudget, setCatBudget] = useState(() => {
+        const stored = data?.user?.categoryBudget;
+        return (stored && Object.keys(stored).length > 0) ? stored : { ...DEFAULT_CATEGORIES };
+    });
 
     useEffect(() => {
         if (data?.user) {
             setLimit(data.user.monthlySpendingLimit === null ? '' : data.user.monthlySpendingLimit);
-            setCatBudget(data.user.categoryBudget || {});
+            const stored = data.user.categoryBudget;
+            setCatBudget((stored && Object.keys(stored).length > 0) ? stored : { ...DEFAULT_CATEGORIES });
         }
     }, [data?.user?.monthlySpendingLimit, data?.user?.categoryBudget]);
 
