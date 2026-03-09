@@ -232,7 +232,7 @@ export const DataProvider = ({ children }) => {
                 await supabaseFetch('transactions', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(newTx)
+                    body: JSON.stringify({ ...newTx, user_id: data.user.id })
                 });
             }
         } catch (err) {
@@ -292,6 +292,7 @@ export const DataProvider = ({ children }) => {
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({
                         id: newGoal.id,
+                        user_id: data.user.id,
                         name: newGoal.name,
                         target_amount: Number(newGoal.targetAmount),
                         current_amount: Number(newGoal.currentAmount || 0),
@@ -359,7 +360,10 @@ export const DataProvider = ({ children }) => {
             setData(prev => ({ ...prev, user: updatedUser }));
 
             if (SUPABASE_URL && SUPABASE_KEY && token) {
-                await supabaseFetch(`profiles?id=eq.${data.user.id}`, {
+                const payload = parseJWT(token);
+                const currentUserId = payload.sub || data.user.id;
+
+                await supabaseFetch(`profiles?id=eq.${currentUserId}`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({

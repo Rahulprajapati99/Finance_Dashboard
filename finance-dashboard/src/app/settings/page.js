@@ -48,7 +48,6 @@ const Settings = () => {
     const handleSaveProfile = async () => {
         setError('');
 
-        // Validation
         if (!name.trim()) {
             setError('Display name is required.');
             return;
@@ -64,10 +63,16 @@ const Settings = () => {
 
         await updateUser({
             name: name.trim(),
-            monthlySpendingLimit: limit === '' ? null : Number(limit),
-            categoryBudget: catBudget
+            monthlySpendingLimit: limit === '' ? null : Number(limit)
         });
         alert('Profile updated successfully!');
+    };
+
+    const handleSaveBudget = async () => {
+        await updateUser({
+            categoryBudget: catBudget
+        });
+        alert('Budget updated successfully!');
     };
 
     const handleResetBudget = () => {
@@ -138,7 +143,27 @@ const Settings = () => {
                         </div>
                     </div>
                 </div>
-            </Section>
+                <div style={{ marginTop: '1.5rem' }}>
+                    <button
+                        onClick={handleSaveProfile}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            backgroundColor: 'var(--color-primary)',
+                            color: 'white',
+                            padding: '10px 20px',
+                            borderRadius: '8px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            border: 'none'
+                        }}
+                    >
+                        <Save size={18} />
+                        Save Profile
+                    </button>
+                </div>
+            </Section >
 
             <Section title="Category Budget" icon={Save}>
                 <p style={{ color: 'var(--color-text-body)', fontSize: '14px', marginBottom: '1.5rem' }}>
@@ -165,17 +190,18 @@ const Settings = () => {
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <button
-                        onClick={async () => {
-                            await handleSaveProfile();
-                            alert('Budget updated successfully!');
-                        }}
+                        onClick={handleSaveBudget}
                         style={{
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
                             backgroundColor: 'var(--color-primary)',
                             color: 'white',
-                            padding: '12px 24px'
+                            padding: '12px 24px',
+                            borderRadius: '8px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            border: 'none'
                         }}
                     >
                         <Save size={18} />
@@ -240,7 +266,7 @@ const Settings = () => {
                     </button>
                 </div>
             </Section>
-        </div>
+        </div >
     );
 };
 
