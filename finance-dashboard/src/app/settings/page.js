@@ -8,6 +8,9 @@ import { User, Shield, Bell, Moon, Sun, Trash2, Save } from 'lucide-react';
 const Settings = () => {
     const { data, updateUser, resetData } = useData();
     const { isDarkMode, toggleTheme } = useTheme();
+    const [name, setName] = useState(data?.user?.name || '');
+    const [limit, setLimit] = useState(data?.user?.monthlySpendingLimit || '');
+    const [error, setError] = useState('');
     const [catBudgets, setCatBudgets] = useState(data?.user?.categoryBudgets || {});
 
     // Sync local state when context data changes (e.g. after sync from Supabase)
