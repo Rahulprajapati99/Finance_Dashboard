@@ -1,9 +1,32 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
 const DataContext = createContext();
 
 export const useData = () => useContext(DataContext);
+
+// Helper: use fetch directly instead of supabase-js to avoid init issues
+async function supabaseFetch(path, options = {}) {
+    const { headers: customHeaders, ...restOptions } = options;
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+        headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+            ...customHeaders
+        },
+        ...restOptions
+    });
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Supabase error ${res.status}: ${text}`);
+    }
+    return res.status === 204 ? null : res.json();
+}
 
 function parseJWT(token) {
     try {
@@ -61,27 +84,46 @@ export const DataProvider = ({ children }) => {
                 } catch (e) { /* ignore */ }
             }
 
-            if (token) {
+            if (SUPABASE_URL && SUPABASE_KEY && token) {
                 try {
-                    // Extract name from token (same logic as Next.js version)
                     const payload = parseJWT(token);
+                    const userId = payload.sub;
                     const metadata = payload.user_metadata || payload.raw_user_meta_data || {};
-                    const fullName = metadata.full_name ||
-                        metadata.name ||
-                        (metadata.given_name ? `${metadata.given_name} ${metadata.family_name || ''}`.trim() : null) ||
-                        payload.email?.split('@')[0] ||
-                        'User';
+                    const fullName = metadata.full_name || metadata.name || payload.email?.split('@')[0] || 'User';
+
+                    const txPromise = supabaseFetch('transactions?select=*&order=date.desc', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const goalsPromise = supabaseFetch('goals?select=*&order=created_at.asc', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const profilePromise = supabaseFetch(`profiles?id=eq.${userId}&select=*`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    const [txData, goalsData, profileData] = await Promise.all([txPromise, goalsPromise, profilePromise]);
+
+                    let userProfile = profileData && profileData.length > 0 ? profileData[0] : null;
 
                     setData(prev => ({
                         ...prev,
                         user: {
-                            ...prev.user,
-                            id: payload.sub,
-                            name: fullName,
+                            id: userId,
+                            name: userProfile?.name || fullName,
+                            monthlySpendingLimit: userProfile?.monthly_spending_limit || null,
+                            categoryBudget: userProfile?.category_budget || prev.user.categoryBudget,
                             avatar: metadata.avatar_url || null
-                        }
+                        },
+                        transactions: txData || [],
+                        goals: (goalsData || []).map(g => ({
+                            id: g.id,
+                            name: g.name,
+                            targetAmount: g.target_amount,
+                            currentAmount: g.current_amount,
+                            targetDate: g.target_date
+                        }))
                     }));
-                } catch (e) { console.error('Token parse failed:', e); }
+                } catch (e) { console.error('Supabase init failed:', e); }
             }
             setIsLoading(false);
         };
@@ -94,59 +136,148 @@ export const DataProvider = ({ children }) => {
         }
     }, [data, isLoading]);
 
-    const addTransaction = (tx) => {
+    const addTransaction = async (tx) => {
+        const token = localStorage.getItem('sb-token');
         const sanitizedTx = {
             ...tx,
             recipientName: sanitizeText(tx.recipientName, 100),
             notes: sanitizeText(tx.notes, 500),
-            amount: Number(tx.amount)
+            amount: Number(tx.amount),
+            id: uuidv4(),
+            date: new Date().toISOString()
         };
+
         setData(prev => ({
             ...prev,
-            transactions: [
-                { ...sanitizedTx, id: uuidv4(), date: new Date().toISOString() },
-                ...prev.transactions
-            ]
+            transactions: [sanitizedTx, ...prev.transactions]
         }));
+
+        if (SUPABASE_URL && SUPABASE_KEY && token) {
+            try {
+                await supabaseFetch('transactions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ ...sanitizedTx, user_id: data.user.id })
+                });
+            } catch (err) { console.error('Save transaction failed:', err); }
+        }
     };
-    const deleteTransaction = (id) => setData(prev => ({ ...prev, transactions: prev.transactions.filter(t => t.id !== id) }));
-    const editTransaction = (updatedTx) => setData(prev => ({ ...prev, transactions: prev.transactions.map(t => t.id === updatedTx.id ? { ...t, ...updatedTx } : t) }));
-    const addCard = (card) => setData(prev => ({ ...prev, cards: [...prev.cards, { id: uuidv4(), ...card }] }));
-    const deleteCard = (id) => setData(prev => ({ ...prev, cards: prev.cards.filter(c => c.id !== id) }));
-    const addGoal = (goal) => {
-        const sanitizedGoal = {
+
+    const deleteTransaction = async (id) => {
+        const token = localStorage.getItem('sb-token');
+        setData(prev => ({ ...prev, transactions: prev.transactions.filter(t => t.id !== id) }));
+        if (SUPABASE_URL && SUPABASE_KEY && token) {
+            try {
+                await supabaseFetch(`transactions?id=eq.${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            } catch (err) { console.error('Delete transaction failed:', err); }
+        }
+    };
+
+    const addGoal = async (goal) => {
+        const token = localStorage.getItem('sb-token');
+        const newGoal = {
             ...goal,
+            id: uuidv4(),
             name: sanitizeText(goal.name, 100),
             targetAmount: Number(goal.targetAmount),
-            currentAmount: Number(goal.currentAmount)
+            currentAmount: Number(goal.currentAmount || 0)
         };
-        setData(prev => ({
-            ...prev,
-            goals: [...prev.goals, { ...sanitizedGoal, id: uuidv4() }]
-        }));
+
+        setData(prev => ({ ...prev, goals: [...prev.goals, newGoal] }));
+
+        if (SUPABASE_URL && SUPABASE_KEY && token) {
+            try {
+                await supabaseFetch('goals', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({
+                        id: newGoal.id,
+                        user_id: data.user.id,
+                        name: newGoal.name,
+                        target_amount: newGoal.targetAmount,
+                        current_amount: newGoal.currentAmount,
+                        target_date: newGoal.targetDate
+                    })
+                });
+            } catch (err) { console.error('Save goal failed:', err); }
+        }
     };
-    const updateGoal = (updatedGoal) => {
+
+    const updateGoal = async (updatedGoal) => {
+        const token = localStorage.getItem('sb-token');
         const sanitizedGoal = {
             ...updatedGoal,
             name: sanitizeText(updatedGoal.name, 100),
             targetAmount: Number(updatedGoal.targetAmount),
             currentAmount: Number(updatedGoal.currentAmount)
         };
-        setData(prev => ({ ...prev, goals: prev.goals.map(g => g.id === sanitizedGoal.id ? sanitizedGoal : g) }));
+
+        setData(prev => ({
+            ...prev,
+            goals: prev.goals.map(g => g.id === sanitizedGoal.id ? sanitizedGoal : g)
+        }));
+
+        if (SUPABASE_URL && SUPABASE_KEY && token) {
+            try {
+                await supabaseFetch(`goals?id=eq.${sanitizedGoal.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({
+                        name: sanitizedGoal.name,
+                        target_amount: sanitizedGoal.targetAmount,
+                        current_amount: sanitizedGoal.currentAmount,
+                        target_date: sanitizedGoal.targetDate
+                    })
+                });
+            } catch (err) { console.error('Update goal failed:', err); }
+        }
     };
-    const deleteGoal = (id) => setData(prev => ({ ...prev, goals: prev.goals.filter(g => g.id !== id) }));
-    const updateBudget = (category, amount) => setData(prev => ({ ...prev, budget: { ...prev.budget, [category]: Number(amount) } }));
-    const updateUser = (u) => {
-        const sanitizedName = u.name ? sanitizeText(u.name, 100) : data.user.name;
+
+    const deleteGoal = async (id) => {
+        const token = localStorage.getItem('sb-token');
+        setData(prev => ({ ...prev, goals: prev.goals.filter(g => g.id !== id) }));
+        if (SUPABASE_URL && SUPABASE_KEY && token) {
+            try {
+                await supabaseFetch(`goals?id=eq.${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            } catch (err) { console.error('Delete goal failed:', err); }
+        }
+    };
+
+    const updateUser = async (u) => {
+        const token = localStorage.getItem('sb-token');
         const updatedUser = {
             ...data.user,
             ...u,
-            name: sanitizedName,
+            name: u.name ? sanitizeText(u.name, 100) : data.user.name,
             monthlySpendingLimit: u.monthlySpendingLimit === undefined ? data.user.monthlySpendingLimit : (u.monthlySpendingLimit === null ? null : Number(u.monthlySpendingLimit)),
             categoryBudget: u.categoryBudget || data.user.categoryBudget
         };
+
         setData(prev => ({ ...prev, user: updatedUser }));
+
+        if (SUPABASE_URL && SUPABASE_KEY && token) {
+            try {
+                const payload = parseJWT(token);
+                const currentUserId = payload.sub || data.user.id;
+                await supabaseFetch(`profiles?id=eq.${currentUserId}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({
+                        name: updatedUser.name,
+                        monthly_spending_limit: updatedUser.monthlySpendingLimit,
+                        category_budget: updatedUser.categoryBudget
+                    })
+                });
+            } catch (err) { console.error('Update profile failed:', err); }
+        }
     };
+
     const markNotificationRead = (id) => setData(prev => ({ ...prev, notifications: prev.notifications.map(n => n.id === id ? { ...n, read: true } : n) }));
     const clearAllNotifications = () => setData(prev => ({ ...prev, notifications: [] }));
     const resetData = () => { localStorage.removeItem('finance_db'); localStorage.removeItem('sb-token'); window.location.reload(); };
@@ -157,7 +288,6 @@ export const DataProvider = ({ children }) => {
         window.location.href = '/login';
     };
 
-    // Computed Values
     const totalIncome = data.transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
     const totalExpense = data.transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
     const totalSavings = totalIncome - totalExpense;
@@ -165,11 +295,9 @@ export const DataProvider = ({ children }) => {
     return (
         <DataContext.Provider value={{
             data, isLoading,
-            addTransaction, deleteTransaction, editTransaction,
-            addCard, deleteCard,
+            addTransaction, deleteTransaction,
             addGoal, updateGoal, deleteGoal,
-            updateBudget, updateUser,
-            markNotificationRead, clearAllNotifications, resetData, logout,
+            updateUser, resetData, logout,
             totalIncome, totalExpense, totalSavings
         }}>
             {children}
