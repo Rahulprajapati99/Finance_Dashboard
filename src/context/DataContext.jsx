@@ -71,7 +71,13 @@ export const DataProvider = ({ children }) => {
     const updateUser = (userData) => setData(prev => ({ ...prev, user: { ...prev.user, ...userData } }));
     const markNotificationRead = (id) => setData(prev => ({ ...prev, notifications: prev.notifications.map(n => n.id === id ? { ...n, read: true } : n) }));
     const clearAllNotifications = () => setData(prev => ({ ...prev, notifications: [] }));
-    const resetData = () => { localStorage.removeItem('finance_db'); window.location.reload(); };
+    const resetData = () => { localStorage.removeItem('finance_db'); localStorage.removeItem('sb-token'); window.location.reload(); };
+    const logout = () => {
+        localStorage.removeItem('sb-token');
+        localStorage.removeItem('finance_db');
+        document.cookie = "sb-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        window.location.href = '/login';
+    };
 
     // Computed Values
     const totalIncome = data.transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
@@ -85,7 +91,7 @@ export const DataProvider = ({ children }) => {
             addCard, deleteCard,
             addGoal, updateGoal, deleteGoal,
             updateBudget, updateUser,
-            markNotificationRead, clearAllNotifications, resetData,
+            markNotificationRead, clearAllNotifications, resetData, logout,
             totalIncome, totalExpense, totalSavings
         }}>
             {children}

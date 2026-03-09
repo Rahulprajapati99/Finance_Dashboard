@@ -167,6 +167,7 @@ export const DataProvider = ({ children }) => {
 
     const logout = () => {
         localStorage.removeItem('sb-token');
+        localStorage.removeItem('finance_db');
         document.cookie = "sb-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         window.location.href = '/login';
     };
@@ -285,7 +286,8 @@ export const DataProvider = ({ children }) => {
     const updateUser = (u) => setData(prev => ({ ...prev, user: { ...prev.user, ...u } }));
     const markNotificationRead = (id) => setData(prev => ({ ...prev, notifications: prev.notifications.map(n => n.id === id ? { ...n, read: true } : n) }));
     const clearAllNotifications = () => setData(prev => ({ ...prev, notifications: [] }));
-    const resetData = () => { localStorage.removeItem('finance_db'); window.location.reload(); };
+    const resetData = () => { localStorage.removeItem('finance_db'); localStorage.removeItem('sb-token'); window.location.reload(); };
+
 
     // Computed Values
     const totalIncome = data.transactions
