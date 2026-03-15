@@ -176,11 +176,24 @@ button:active {
 @media (max-width: 768px) {
   body {
     font-size: 14px;
-    /* Prevent double-tap zoom on mobile inputs */
     touch-action: manipulation;
   }
 
-  /* Force all 3-column or 2-column grids to become 1-column on mobile */
+  /* Structural Resets */
+  .app-container {
+    flex-direction: column !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+  }
+
+  .main-content {
+    flex: 1;
+    overflow-y: auto !important;
+    padding: 1rem !important;
+    padding-bottom: 80px !important; /* Space for bottom nav */
+  }
+
+  /* Grid Reductions */
   [style*="grid-template-columns"], 
   .dashboard-grid,
   .reports-grid {
@@ -188,75 +201,64 @@ button:active {
     gap: 1rem !important;
   }
 
-  /* Adjust Main Content Layout */
-  /* Assuming the app uses a flex row for sidebar + content */
-  .app-container {
-    flex-direction: column !important;
-  }
-
-  /* Convert Sidebar into a Bottom Navigation or Top Header */
+  /* Force Sidebar to Bottom Navigation */
   .sidebar {
     width: 100% !important;
-    height: auto !important;
-    min-height: 60px !important;
+    min-width: 0 !important;
+    height: 65px !important;
+    min-height: 65px !important;
     flex-direction: row !important;
-    overflow-x: auto !important;
-    padding: 0.5rem !important;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    z-index: 1000;
-    border-right: none !important;
-    border-top: 1px solid var(--color-border);
-    justify-content: space-around;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    top: auto !important;
+    z-index: 9999 !important; /* Super high to prevent overlap */
+    padding: 0 !important;
+    background: var(--color-navy) !important;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.1) !important;
   }
 
-  /* Hide sidebar logo/text on mobile to save space */
-  .sidebar-logo, 
-  .sidebar span {
+  /* Hide the RP Software Logo/Brand in bottom nav */
+  .sidebar > div:first-child,
+  .sidebar > div:last-child {
     display: none !important;
   }
 
-  .sidebar a {
-    padding: 0.5rem !important;
-    justify-content: center !important;
+  /* Make nav items act like iOS tabs */
+  .sidebar nav {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100% !important;
+    padding: 0 !important;
+    justify-content: space-around !important;
+    align-items: center !important;
   }
 
-  /* Adjust main content area to clear bottom nav */
-  .main-content {
-    padding-bottom: 80px !important; /* Space for bottom nav */
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    margin-left: 0 !important; /* Remove sidebar offset */
+  .sidebar nav a {
+    flex-direction: column !important;
+    padding: 0.25rem !important;
+    margin-bottom: 0 !important;
+    font-size: 10px !important;
+    border: none !important;
+    background: transparent !important;
+    border-radius: 0 !important;
   }
 
-  /* Adjust Modal Sizes */
-  .modal-content {
-    width: 95% !important;
-    padding: 1.5rem !important;
-    margin: 1rem !important;
-    max-height: 90vh;
-    overflow-y: auto;
+  .sidebar nav a svg {
+    margin-right: 0 !important;
+    margin-bottom: 2px !important;
   }
 
-  /* Charts should resize contextually */
-  canvas {
-    max-width: 100% !important;
-    height: auto !important;
+  /* Table responsive styling - prevents bleed */
+  .table-container,
+  [style*="overflow-x: auto"] {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
   }
-
-  /* Adjust large headers */
-  h1 { font-size: 1.5rem !important; }
-  h2 { font-size: 1.25rem !important; }
-
-  /* Ensure tables scroll horizontally on small screens instead of overflowing */
-  .table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    width: 100%;
-  }
-
+  
   table {
-    min-width: 500px; /* Force minimum width to trigger scrolling */
+    min-width: 600px !important;
   }
 }
