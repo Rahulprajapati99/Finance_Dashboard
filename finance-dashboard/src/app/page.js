@@ -11,15 +11,14 @@ import AddTransactionModal from '@/components/AddTransactionModal';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 const MetricCard = ({ title, amount, icon: Icon, trend, type }) => (
-    <div style={{
+    <div className="metric-card" style={{
         backgroundColor: 'var(--color-white)',
         padding: '1.5rem',
         borderRadius: '12px',
         boxShadow: 'var(--shadow-card)',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
-        height: '140px'
+        justifyContent: 'space-between'
     }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
@@ -101,8 +100,8 @@ const Dashboard = () => {
     };
 
     return (
-        <div style={{ paddingBottom: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <div style={{ paddingBottom: '5rem' }}>
+            <div className="overview-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <div>
                     <h2 style={{ fontSize: '24px' }}>Overview</h2>
                     <p style={{ color: 'var(--color-text-body)' }}>Hi {user?.name || 'there'}, here's your financial summary.</p>
@@ -128,7 +127,7 @@ const Dashboard = () => {
 
             <AddTransactionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+            <div className="metric-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
                 <MetricCard title="Total Balance" amount={totalBalance} icon={Wallet} trend={12.5} type="neutral" />
                 <MetricCard title="Total Income" amount={totalIncome} icon={ArrowDownRight} trend={8.2} type="income" />
                 <MetricCard title="Total Expense" amount={totalExpense} icon={ArrowUpRight} trend={-2.4} type="expense" />
@@ -206,14 +205,14 @@ const Dashboard = () => {
                 )}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-                <div style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)', height: '400px' }}>
+            <div className="chart-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+                <div className="chart-container" style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)', height: '400px' }}>
                     <h3 style={{ marginBottom: '1.5rem', fontSize: '18px' }}>Total Income</h3>
                     <div style={{ height: '300px' }}>
                         <Bar data={incomeData} options={chartOptions} />
                     </div>
                 </div>
-                <div style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)', height: '400px' }}>
+                <div className="chart-container" style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)', height: '400px' }}>
                     <h3 style={{ marginBottom: '1.5rem', fontSize: '18px' }}>Category Budget</h3>
                     <div style={{ height: '250px', display: 'flex', justifyContent: 'center' }}>
                         {hasBudget // Used hasBudget
@@ -231,33 +230,35 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)' }}>
+            <div className="table-card" style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)' }}>
                 <h3 style={{ marginBottom: '1rem', fontSize: '18px' }}>Recent Transactions</h3>
                 {transactions.length === 0 ? (
                     <p style={{ color: '#9CA3AF', textAlign: 'center', padding: '2rem 0' }}>No transactions yet. Add one to get started!</p>
                 ) : (
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
-                                <th style={{ textAlign: 'left', padding: '0.75rem', fontSize: '12px', color: '#6B7280' }}>RECIPIENT</th>
-                                <th style={{ textAlign: 'left', padding: '0.75rem', fontSize: '12px', color: '#6B7280' }}>CATEGORY</th>
-                                <th style={{ textAlign: 'left', padding: '0.75rem', fontSize: '12px', color: '#6B7280' }}>DATE</th>
-                                <th style={{ textAlign: 'right', padding: '0.75rem', fontSize: '12px', color: '#6B7280' }}>AMOUNT</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {transactions.slice(0, 5).map(tx => (
-                                <tr key={tx.id} style={{ borderBottom: '1px solid #F9FAFB' }}>
-                                    <td style={{ padding: '0.875rem' }}>{tx.recipientName}</td>
-                                    <td style={{ padding: '0.875rem', color: '#6B7280' }}>{tx.category}</td>
-                                    <td style={{ padding: '0.875rem', color: '#6B7280' }}>{new Date(tx.date).toLocaleDateString()}</td>
-                                    <td style={{ padding: '0.875rem', textAlign: 'right', fontWeight: 600, color: tx.type === 'income' ? '#2E7D32' : '#C62828' }}>
-                                        {tx.type === 'income' ? '+' : '-'}${Number(tx.amount).toLocaleString()}
-                                    </td>
+                    <div className="table-container">
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                                    <th style={{ textAlign: 'left', padding: '0.75rem', fontSize: '12px', color: '#6B7280' }}>RECIPIENT</th>
+                                    <th style={{ textAlign: 'left', padding: '0.75rem', fontSize: '12px', color: '#6B7280' }}>CATEGORY</th>
+                                    <th style={{ textAlign: 'left', padding: '0.75rem', fontSize: '12px', color: '#6B7280' }}>DATE</th>
+                                    <th style={{ textAlign: 'right', padding: '0.75rem', fontSize: '12px', color: '#6B7280' }}>AMOUNT</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {transactions.slice(0, 5).map(tx => (
+                                    <tr key={tx.id} style={{ borderBottom: '1px solid #F9FAFB' }}>
+                                        <td style={{ padding: '0.875rem' }}>{tx.recipientName}</td>
+                                        <td style={{ padding: '0.875rem', color: '#6B7280' }}>{tx.category}</td>
+                                        <td style={{ padding: '0.875rem', color: '#6B7280' }}>{new Date(tx.date).toLocaleDateString()}</td>
+                                        <td style={{ padding: '0.875rem', textAlign: 'right', fontWeight: 600, color: tx.type === 'income' ? '#2E7D32' : '#C62828' }}>
+                                            {tx.type === 'income' ? '+' : '-'}${Number(tx.amount).toLocaleString()}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
         </div>

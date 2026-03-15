@@ -20,10 +20,11 @@ const Transactions = () => {
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div className="overview-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h2 style={{ fontSize: '24px' }}>Transactions</h2>
                 <button
                     onClick={() => setIsModalOpen(true)}
+                    className="add-btn"
                     style={{
                         backgroundColor: 'var(--color-primary)',
                         color: 'white',
@@ -43,9 +44,9 @@ const Transactions = () => {
 
             <AddTransactionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', gap: '1rem', flex: 1 }}>
-                    <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
+            <div className="filter-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', gap: '1rem', flex: 1, flexWrap: 'wrap' }}>
+                    <div style={{ position: 'relative', flex: 1, minWidth: '250px', maxWidth: '400px' }}>
                         <Search size={18} color="#9CA3AF" style={{ position: 'absolute', left: '12px', top: '12px' }} />
                         <input
                             type="text"
@@ -86,56 +87,58 @@ const Transactions = () => {
             </div>
 
             <div style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: 'var(--shadow-card)', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                    <thead style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid var(--color-border)' }}>
-                        <tr>
-                            <th style={{ padding: '1rem', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>TRANSACTION ID</th>
-                            <th style={{ padding: '1rem', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>NAME</th>
-                            <th style={{ padding: '1rem', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>CATEGORY</th>
-                            <th style={{ padding: '1rem', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>DATE</th>
-                            <th style={{ padding: '1rem', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>AMOUNT</th>
-                            <th style={{ padding: '1rem', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>STATUS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filtered.length > 0 ? filtered.map((t) => (
-                            <tr key={t.id} style={{ borderBottom: '1px solid #F3F4F6', transition: 'background-color 0.1s' }}>
-                                <td style={{ padding: '1rem', fontFamily: 'monospace', fontSize: '12px', color: '#6B7280' }}>#{t.id.slice(0, 8)}</td>
-                                <td style={{ padding: '1rem', fontWeight: 500 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 600 }}>
-                                            {t.recipientName ? t.recipientName.charAt(0) : 'T'}
-                                        </div>
-                                        {t.recipientName}
-                                    </div>
-                                </td>
-                                <td style={{ padding: '1rem' }}>
-                                    <span style={{ padding: '4px 10px', borderRadius: '12px', backgroundColor: '#F3F4F6', fontSize: '12px', color: '#4B5563' }}>{t.category}</span>
-                                </td>
-                                <td style={{ padding: '1rem', color: '#6B7280', fontSize: '14px' }}>{new Date(t.date).toLocaleDateString()}</td>
-                                <td style={{ padding: '1rem', fontWeight: 600, color: t.type === 'income' ? '#059669' : '#DC2626' }}>
-                                    {t.type === 'income' ? '+' : '-'}${Number(t.amount).toLocaleString()}
-                                </td>
-                                <td style={{ padding: '1rem' }}>
-                                    <span style={{
-                                        padding: '4px 10px',
-                                        borderRadius: '12px',
-                                        fontSize: '12px',
-                                        fontWeight: 500,
-                                        backgroundColor: t.status === 'completed' ? '#DEF7EC' : t.status === 'failed' ? '#FDE8E8' : '#FEF3C7',
-                                        color: t.status === 'completed' ? '#03543F' : t.status === 'failed' ? '#9B1C1C' : '#92400E'
-                                    }}>
-                                        {t.status ? (t.status.charAt(0).toUpperCase() + t.status.slice(1)) : 'Completed'}
-                                    </span>
-                                </td>
-                            </tr>
-                        )) : (
+                <div className="table-container">
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        <thead style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid var(--color-border)' }}>
                             <tr>
-                                <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: '#6B7280' }}>No transactions found.</td>
+                                <th style={{ padding: '1rem', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>TRANSACTION ID</th>
+                                <th style={{ padding: '1rem', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>NAME</th>
+                                <th style={{ padding: '1rem', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>CATEGORY</th>
+                                <th style={{ padding: '1rem', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>DATE</th>
+                                <th style={{ padding: '1rem', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>AMOUNT</th>
+                                <th style={{ padding: '1rem', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>STATUS</th>
                             </tr>
-                        )}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {filtered.length > 0 ? filtered.map((t) => (
+                                <tr key={t.id} style={{ borderBottom: '1px solid #F3F4F6', transition: 'background-color 0.1s' }}>
+                                    <td style={{ padding: '1rem', fontFamily: 'monospace', fontSize: '12px', color: '#6B7280' }}>#{t.id.slice(0, 8)}</td>
+                                    <td style={{ padding: '1rem', fontWeight: 500 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 600 }}>
+                                                {t.recipientName ? t.recipientName.charAt(0) : 'T'}
+                                            </div>
+                                            {t.recipientName}
+                                        </div>
+                                    </td>
+                                    <td style={{ padding: '1rem' }}>
+                                        <span style={{ padding: '4px 10px', borderRadius: '12px', backgroundColor: '#F3F4F6', fontSize: '12px', color: '#4B5563' }}>{t.category}</span>
+                                    </td>
+                                    <td style={{ padding: '1rem', color: '#6B7280', fontSize: '14px' }}>{new Date(t.date).toLocaleDateString()}</td>
+                                    <td style={{ padding: '1rem', fontWeight: 600, color: t.type === 'income' ? '#059669' : '#DC2626' }}>
+                                        {t.type === 'income' ? '+' : '-'}${Number(t.amount).toLocaleString()}
+                                    </td>
+                                    <td style={{ padding: '1rem' }}>
+                                        <span style={{
+                                            padding: '4px 10px',
+                                            borderRadius: '12px',
+                                            fontSize: '12px',
+                                            fontWeight: 500,
+                                            backgroundColor: t.status === 'completed' ? '#DEF7EC' : t.status === 'failed' ? '#FDE8E8' : '#FEF3C7',
+                                            color: t.status === 'completed' ? '#03543F' : t.status === 'failed' ? '#9B1C1C' : '#92400E'
+                                        }}>
+                                            {t.status ? (t.status.charAt(0).toUpperCase() + t.status.slice(1)) : 'Completed'}
+                                        </span>
+                                    </td>
+                                </tr>
+                            )) : (
+                                <tr>
+                                    <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: '#6B7280' }}>No transactions found.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

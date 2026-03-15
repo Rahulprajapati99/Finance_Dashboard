@@ -29,22 +29,12 @@ const Header = ({ title }) => {
             }}>{title || 'Dashboard'}</h2>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ position: 'relative', marginRight: '1rem' }}>
+                <div className="header-search-container" style={{ position: 'relative', marginRight: '1rem' }}>
                     <Search size={20} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '10px' }} />
                     <input
                         type="text"
+                        className="search-input"
                         placeholder="Search..."
-                        style={{
-                            padding: '10px 10px 10px 42px',
-                            borderRadius: '12px',
-                            border: '1px solid transparent',
-                            backgroundColor: 'var(--color-bg-light)', /* Dynamic bg */
-                            width: '280px',
-                            outline: 'none',
-                            fontSize: '14px',
-                            transition: 'all 0.2s ease',
-                            color: 'var(--color-text-main)'
-                        }}
                         onFocus={(e) => {
                             e.target.style.backgroundColor = 'var(--color-white)';
                             e.target.style.border = '1px solid var(--color-primary)';

@@ -87,15 +87,15 @@ const Analytics = () => {
         <div>
             <h2 style={{ fontSize: '24px', marginBottom: '2rem' }}>Analytics</h2>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-                <div style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)', height: '400px' }}>
+            <div className="chart-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+                <div className="chart-container" style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)', height: '400px' }}>
                     <h3 style={{ marginBottom: '1.5rem', fontSize: '18px' }}>Income vs Expenses (7 Days)</h3>
                     <div style={{ height: '300px' }}>
                         <Line data={spendingTrendsData} options={{ maintainAspectRatio: false, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true, grid: { color: '#F3F4F6' } }, x: { grid: { display: false } } } }} />
                     </div>
                 </div>
 
-                <div style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)', height: '400px' }}>
+                <div className="chart-container" style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)', height: '400px' }}>
                     <h3 style={{ marginBottom: '1.5rem', fontSize: '18px' }}>Expenses by Category</h3>
                     <div style={{ height: '300px', display: 'flex', justifyContent: 'center' }}>
                         <Doughnut data={categoryData} options={{ maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }} />
@@ -103,37 +103,39 @@ const Analytics = () => {
                 </div>
             </div>
 
-            <div style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)' }}>
+            <div className="table-card" style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)' }}>
                 <h3 style={{ marginBottom: '1rem', fontSize: '18px' }}>Top Expenses</h3>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                        <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-body)', fontSize: '12px', textAlign: 'left' }}>
-                            <th style={{ padding: '12px', fontWeight: 600 }}>TRANSACTION</th>
-                            <th style={{ padding: '12px', fontWeight: 600 }}>CATEGORY</th>
-                            <th style={{ padding: '12px', fontWeight: 600 }}>DATE</th>
-                            <th style={{ padding: '12px', fontWeight: 600, textAlign: 'right' }}>AMOUNT</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {transactions
-                            .filter(t => t.type === 'expense')
-                            .sort((a, b) => Number(b.amount) - Number(a.amount))
-                            .slice(0, 5)
-                            .map(t => (
-                                <tr key={t.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
-                                    <td style={{ padding: '12px', fontWeight: 500 }}>{t.recipientName}</td>
-                                    <td style={{ padding: '12px', color: '#6B7280' }}>{t.category}</td>
-                                    <td style={{ padding: '12px', color: '#6B7280' }}>{new Date(t.date).toLocaleDateString()}</td>
-                                    <td style={{ padding: '12px', fontWeight: 600, textAlign: 'right' }}>-${Number(t.amount).toLocaleString()}</td>
-                                </tr>
-                            ))}
-                        {transactions.filter(t => t.type === 'expense').length === 0 && (
-                            <tr>
-                                <td colSpan="4" style={{ textAlign: 'center', padding: '2rem', color: '#9CA3AF' }}>No expense data available yet.</td>
+                <div className="table-container">
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-body)', fontSize: '12px', textAlign: 'left' }}>
+                                <th style={{ padding: '12px', fontWeight: 600 }}>TRANSACTION</th>
+                                <th style={{ padding: '12px', fontWeight: 600 }}>CATEGORY</th>
+                                <th style={{ padding: '12px', fontWeight: 600 }}>DATE</th>
+                                <th style={{ padding: '12px', fontWeight: 600, textAlign: 'right' }}>AMOUNT</th>
                             </tr>
-                        )}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {transactions
+                                .filter(t => t.type === 'expense')
+                                .sort((a, b) => Number(b.amount) - Number(a.amount))
+                                .slice(0, 5)
+                                .map(t => (
+                                    <tr key={t.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                                        <td style={{ padding: '12px', fontWeight: 500 }}>{t.recipientName}</td>
+                                        <td style={{ padding: '12px', color: '#6B7280' }}>{t.category}</td>
+                                        <td style={{ padding: '12px', color: '#6B7280' }}>{new Date(t.date).toLocaleDateString()}</td>
+                                        <td style={{ padding: '12px', fontWeight: 600, textAlign: 'right' }}>-${Number(t.amount).toLocaleString()}</td>
+                                    </tr>
+                                ))}
+                            {transactions.filter(t => t.type === 'expense').length === 0 && (
+                                <tr>
+                                    <td colSpan="4" style={{ textAlign: 'center', padding: '2rem', color: '#9CA3AF' }}>No expense data available yet.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

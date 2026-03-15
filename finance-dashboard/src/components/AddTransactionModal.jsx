@@ -14,6 +14,16 @@ const AddTransactionModal = ({ isOpen, onClose }) => {
     });
     const [error, setError] = useState('');
 
+    const INCOME_CATEGORIES = ['Salary', 'Investment', 'Other Income'];
+    const EXPENSE_CATEGORIES = ['Food & Grocery', 'Transport', 'Bills & Utilities', 'Entertainment', 'Healthcare', 'Shopping', 'Others'];
+
+    const categories = formData.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+
+    // Reset category to the first one in the list when type changes
+    React.useEffect(() => {
+        setFormData(prev => ({ ...prev, category: categories[0] }));
+    }, [formData.type]);
+
     if (!isOpen) return null;
 
     const handleSubmit = (e) => {
@@ -155,14 +165,9 @@ const AddTransactionModal = ({ isOpen, onClose }) => {
                                 color: 'var(--color-text-main)'
                             }}
                         >
-                            <option>Salary</option>
-                            <option>Food & Grocery</option>
-                            <option>Transport</option>
-                            <option>Bills & Utilities</option>
-                            <option>Entertainment</option>
-                            <option>Healthcare</option>
-                            <option>Investment</option>
-                            <option>Others</option>
+                            {categories.map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
                         </select>
                     </div>
 
