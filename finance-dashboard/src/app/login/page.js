@@ -103,8 +103,13 @@ export default function LoginPage() {
                     )}
                 </div>
 
-                <div style={{ marginTop: '3rem', fontSize: '12px', color: '#94a3b8' }}>
-                    &copy; 2026 RP Software Ltd. All rights reserved.
+                <div style={{ marginTop: '3rem', fontSize: '13px', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div>
+                        <a href="/privacy.html" style={{ color: '#64748b', textDecoration: 'underline' }}>Privacy Policy</a>
+                        {' • '}
+                        <a href="/terms.html" style={{ color: '#64748b', textDecoration: 'underline' }}>Terms of Service</a>
+                    </div>
+                    <div>&copy; 2026 RP Software Ltd. All rights reserved.</div>
                 </div>
             </div>
         </div>
