@@ -4,7 +4,7 @@ import React from 'react';
 import { FileText, Download, Calendar } from 'lucide-react';
 import { useData } from '@/context/DataContext';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import Papa from 'papaparse';
 
 const Reports = () => {
@@ -75,7 +75,7 @@ const Reports = () => {
             tableRows.push(txData);
         });
 
-        doc.autoTable({
+        autoTable(doc, {
             startY: 70,
             head: [tableColumn],
             body: tableRows,
