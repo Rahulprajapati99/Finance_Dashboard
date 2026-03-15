@@ -26,9 +26,9 @@ export default function AppLayout({ children }) {
     const title = titles[pathname] || 'Dashboard';
 
     return (
-        <div id="layout-root" style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--color-bg-light)' }}>
+        <div id="layout-root" className="app-container" style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg-light)' }}>
             <Sidebar />
-            <div id="content-root" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', overflow: 'auto' }}>
+            <div id="content-root" className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', overflow: 'hidden' }}>
                 <Header title={title} />
                 <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
                     {children}

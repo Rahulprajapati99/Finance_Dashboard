@@ -29,17 +29,11 @@ const Sidebar = () => {
     };
 
     return (
-        <aside style={{
-            width: '280px',
-            minWidth: '280px',
+        <aside className="sidebar" style={{
             background: 'linear-gradient(180deg, var(--color-navy) 0%, #0F172A 100%)',
             color: 'white',
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
             position: 'sticky',
             top: 0,
-            height: '100vh',
             overflowY: 'auto',
             zIndex: 10,
             boxShadow: '4px 0 24px rgba(0,0,0,0.1)'

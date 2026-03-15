@@ -135,6 +135,31 @@ button:active {
 }
 
 /* ==========================================================================
+   Main Layout Classes (Replaces Inline Styles)
+   ========================================================================== */
+
+.app-container {
+  display: flex;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 280px;
+  min-width: 280px;
+  min-height: 100vh;
+  height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ==========================================================================
    Mobile & Tablet Responsive CSS
    Making the app feel "native" on a $0 Budget
    ========================================================================== */
