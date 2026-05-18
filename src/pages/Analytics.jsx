@@ -97,7 +97,7 @@ const Analytics = () => {
         <div>
             <h2 style={{ fontSize: '24px', marginBottom: '2rem' }}>Analytics</h2>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+            <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
                 <div style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)', height: '400px' }}>
                     <h3 style={{ marginBottom: '1.5rem', fontSize: '18px' }}>Income vs Expenses (7 Days)</h3>
                     <div style={{ height: '300px' }}>
@@ -129,9 +129,9 @@ const Analytics = () => {
                 </div>
             </div>
 
-            <div style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)' }}>
+            <div style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)', overflowX: 'auto' }}>
                 <h3 style={{ marginBottom: '1rem', fontSize: '18px' }}>Top Expenses</h3>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '500px' }}>
                     <thead>
                         <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-body)', fontSize: '12px', textAlign: 'left' }}>
                             <th style={{ padding: '12px', fontWeight: 600 }}>TRANSACTION</th>

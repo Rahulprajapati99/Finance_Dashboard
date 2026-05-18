@@ -1,9 +1,9 @@
 import React from 'react';
-import { Bell, Search, Settings, Moon, Sun } from 'lucide-react';
+import { Bell, Settings, Moon, Sun, Menu } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 
-const Header = ({ title }) => {
+const Header = ({ title, toggleSidebar }) => {
     const { isDarkMode, toggleTheme } = useTheme();
     const navigate = useNavigate();
 
@@ -21,44 +21,29 @@ const Header = ({ title }) => {
             top: 0,
             zIndex: 5,
             transition: 'all 0.3s ease'
-        }}>
-            <h2 style={{
-                fontSize: '24px',
-                color: 'var(--color-text-main)',
-            }}>{title || 'Dashboard'}</h2>
+        }} className="mobile-header-padding">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <button
+                    onClick={toggleSidebar}
+                    style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--color-text-main)',
+                        display: 'none', // Hidden on desktop, shown via CSS class on mobile
+                    }}
+                    className="mobile-menu-btn"
+                >
+                    <Menu size={24} />
+                </button>
+                <h2 style={{
+                    fontSize: '24px',
+                    color: 'var(--color-text-main)',
+                    margin: 0
+                }}>{title || 'Dashboard'}</h2>
+            </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ position: 'relative', marginRight: '1rem' }}>
-                    <Search size={20} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '10px' }} />
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        style={{
-                            padding: '10px 10px 10px 42px',
-                            borderRadius: '12px',
-                            border: '1px solid transparent',
-                            backgroundColor: 'var(--color-bg-light)', /* Dynamic bg */
-                            width: '280px',
-                            outline: 'none',
-                            fontSize: '14px',
-                            transition: 'all 0.2s ease',
-                            color: 'var(--color-text-main)'
-                        }}
-                        onFocus={(e) => {
-                            e.target.style.backgroundColor = 'var(--color-white)';
-                            e.target.style.border = '1px solid var(--color-primary)';
-                            e.target.style.boxShadow = '0 0 0 4px rgba(46, 58, 140, 0.1)';
-                        }}
-                        onBlur={(e) => {
-                            e.target.style.backgroundColor = 'var(--color-bg-light)';
-                            e.target.style.border = '1px solid transparent';
-                            e.target.style.boxShadow = 'none';
-                        }}
-                    />
-                </div>
-
                 <div style={{ display: 'flex', gap: '8px' }}>
-
                     {/* Theme Toggle */}
                     <button
                         onClick={toggleTheme}
@@ -112,6 +97,7 @@ const Header = ({ title }) => {
                         className="card-hover"
                     >
                         <Bell size={20} color="var(--color-text-body)" />
+                        {/* Dot indicator could be dynamic based on unread count */}
                         <span style={{
                             position: 'absolute',
                             top: '8px',

@@ -35,14 +35,14 @@ const Transactions = () => {
                         cursor: 'pointer',
                         border: 'none'
                     }}>
-                    <Plus size={18} /> Add Transaction
+                    <Plus size={18} /> <span style={{ display: window.innerWidth <= 768 ? 'none' : 'inline' }}>Add Transaction</span>
                 </button>
             </div>
 
             <AddTransactionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', gap: '1rem', flex: 1 }}>
+                <div className="responsive-flex" style={{ display: 'flex', gap: '1rem', flex: 1 }}>
                     <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
                         <Search size={18} color="#9CA3AF" style={{ position: 'absolute', left: '12px', top: '12px' }} />
                         <input
@@ -71,7 +71,8 @@ const Transactions = () => {
                                 border: '1px solid var(--color-border)',
                                 backgroundColor: 'white',
                                 appearance: 'none',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                width: '100%'
                             }}
                         >
                             <option value="all">All Transactions</option>
@@ -83,8 +84,8 @@ const Transactions = () => {
                 </div>
             </div>
 
-            <div style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: 'var(--shadow-card)', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: 'var(--shadow-card)', overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
                     <thead style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid var(--color-border)' }}>
                         <tr>
                             <th style={{ padding: '1rem', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>TRANSACTION ID</th>

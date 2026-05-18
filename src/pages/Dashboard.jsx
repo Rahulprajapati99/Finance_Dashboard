@@ -143,7 +143,7 @@ const Dashboard = () => {
 
             <AddTransactionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+            <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
                 <MetricCard title="Total Balance" amount={totalBalance} icon={Wallet} trend={12.5} type="neutral" />
                 <MetricCard title="Total Income" amount={totalIncome} icon={ArrowDownRight} trend={8.2} type="income" />
                 <MetricCard title="Total Expense" amount={totalExpense} icon={ArrowUpRight} trend={-2.4} type="expense" />
@@ -177,7 +177,7 @@ const Dashboard = () => {
                 marginBottom: '2rem',
                 border: isOverLimit ? '1px solid #EF4444' : '1px solid transparent'
             }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <div className="responsive-flex" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                     <div>
                         <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>Monthly Budget Health</h4>
                         {spendingLimit > 0 ? (
@@ -186,7 +186,7 @@ const Dashboard = () => {
                             </p>
                         ) : (
                             <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#9CA3AF' }}>
-                                Set a monthly spending limit in <a href="/settings" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>Settings</a> to track your budget health.
+                                Set a monthly spending limit in <Link to="/settings" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>Settings</Link> to track your budget health.
                             </p>
                         )}
                     </div>
@@ -197,7 +197,8 @@ const Dashboard = () => {
                             padding: '4px 12px',
                             borderRadius: '12px',
                             fontSize: '12px',
-                            fontWeight: 600
+                            fontWeight: 600,
+                            marginTop: window.innerWidth <= 768 ? '8px' : '0'
                         }}>
                             Limit Exceeded!
                         </span>
@@ -221,7 +222,7 @@ const Dashboard = () => {
                 )}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+            <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
                 <div style={{ backgroundColor: 'var(--color-white)', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-card)', height: '400px' }}>
                     <h3 style={{ marginBottom: '1.5rem', fontSize: '18px' }}>Total Income</h3>
                     <div style={{ height: '300px' }}>

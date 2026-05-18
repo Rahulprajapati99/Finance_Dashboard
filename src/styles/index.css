@@ -133,3 +133,51 @@ button:active {
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+  /* Sidebar */
+  .sidebar {
+    left: -280px; /* Hidden by default on mobile */
+  }
+  
+  .sidebar.open {
+    left: 0;
+  }
+  
+  .mobile-close-btn {
+    display: block !important;
+  }
+  
+  /* Layout & Main Content */
+  .main-content {
+    margin-left: 0 !important;
+  }
+  
+  .mobile-padding {
+    padding: 1rem !important;
+  }
+  
+  .mobile-header-padding {
+    padding: 0 1rem !important;
+  }
+  
+  .mobile-menu-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Utility classes to fix grids on mobile */
+  .responsive-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .responsive-flex {
+    flex-direction: column !important;
+  }
+  
+  .responsive-flex > div {
+    width: 100% !important;
+  }
+}

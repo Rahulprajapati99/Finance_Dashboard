@@ -112,7 +112,7 @@ const Settings = () => {
 
             {/* Profile - Read Only */}
             <Section title="Profile" icon={User}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                     <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Display Name</label>
                         <input
@@ -158,8 +158,8 @@ const Settings = () => {
                 <p style={{ color: 'var(--color-text-body)', fontSize: '14px', marginBottom: '1rem' }}>
                     Set an overall monthly spending limit. This will be used across the Dashboard and Analytics to track your spending.
                 </p>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem' }}>
-                    <div style={{ flex: 1, maxWidth: '300px' }}>
+                <div className="responsive-flex" style={{ display: 'flex', alignItems: window.innerWidth <= 768 ? 'stretch' : 'flex-end', gap: '1rem' }}>
+                    <div style={{ flex: 1, maxWidth: window.innerWidth <= 768 ? '100%' : '300px' }}>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Limit ($)</label>
                         <input
                             type="number"
@@ -179,7 +179,7 @@ const Settings = () => {
                     <button
                         onClick={handleSaveLimit}
                         style={{
-                            display: 'flex', alignItems: 'center', gap: '8px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                             backgroundColor: 'var(--color-primary)', color: 'white',
                             padding: '12px 20px', borderRadius: '8px', fontWeight: 600,
                             cursor: 'pointer', border: 'none', height: '46px'
@@ -196,7 +196,7 @@ const Settings = () => {
                 <p style={{ color: 'var(--color-text-body)', fontSize: '14px', marginBottom: '1.5rem' }}>
                     Set individual monthly limits for each spending category. These will show up in your Dashboard graph.
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
                     {Object.keys(catBudget).map(cat => (
                         <div key={cat}>
                             <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '13px', fontWeight: 500 }}>{cat}</label>
@@ -215,11 +215,11 @@ const Settings = () => {
                         </div>
                     ))}
                 </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="responsive-flex" style={{ display: 'flex', gap: '1rem' }}>
                     <button
                         onClick={handleSaveBudget}
                         style={{
-                            display: 'flex', alignItems: 'center', gap: '8px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                             backgroundColor: 'var(--color-primary)', color: 'white',
                             padding: '12px 24px', borderRadius: '8px', fontWeight: 600,
                             cursor: 'pointer', border: 'none'
@@ -230,7 +230,7 @@ const Settings = () => {
                     </button>
                     <button
                         onClick={handleResetBudget}
-                        style={{ padding: '12px 20px', background: 'var(--color-bg-light)', border: '1px solid var(--color-border)', borderRadius: '8px', cursor: 'pointer' }}
+                        style={{ padding: '12px 20px', background: 'var(--color-bg-light)', border: '1px solid var(--color-border)', borderRadius: '8px', cursor: 'pointer', textAlign: 'center' }}
                     >
                         Reset Budget
                     </button>

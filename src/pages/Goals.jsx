@@ -8,18 +8,12 @@ const Goals = () => {
     const { goals } = data;
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Sequential Allocation (Envelope Method)
+    // Goals are now automatically allocated in DataContext based on targetDate
     const sortedGoals = [...goals].sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate));
-
-    let remainingSavings = totalSavings;
-    const allocatedGoals = sortedGoals.map(goal => {
-        const needed = goal.targetAmount;
-        const allocated = Math.min(needed, Math.max(0, remainingSavings));
-        remainingSavings -= allocated;
-        return { ...goal, allocated };
-    });
-
-    const surplus = Math.max(0, remainingSavings);
+    
+    // Total savings already computed
+    const totalAllocated = sortedGoals.reduce((acc, goal) => acc + goal.currentAmount, 0);
+    const surplus = Math.max(0, totalSavings - totalAllocated);
 
     return (
         <div>
@@ -67,9 +61,9 @@ const Goals = () => {
                 </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.5rem' }}>
-                {allocatedGoals.map((goal) => {
-                    const percentage = Math.round((goal.allocated / goal.targetAmount) * 100);
+            <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 350px), 1fr))', gap: '1.5rem' }}>
+                {sortedGoals.map((goal) => {
+                    const percentage = Math.round((goal.currentAmount / goal.targetAmount) * 100);
                     const isMet = percentage >= 100;
 
                     return (
@@ -97,7 +91,7 @@ const Goals = () => {
 
                             <div style={{ marginBottom: '1rem' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '8px', fontWeight: 500 }}>
-                                    <span>${goal.allocated.toLocaleString()} saved</span>
+                                    <span>${goal.currentAmount.toLocaleString()} saved</span>
                                     <span style={{ color: '#6B7280' }}>of ${goal.targetAmount.toLocaleString()}</span>
                                 </div>
                                 <div style={{ width: '100%', height: '8px', backgroundColor: '#F3F4F6', borderRadius: '4px', overflow: 'hidden' }}>

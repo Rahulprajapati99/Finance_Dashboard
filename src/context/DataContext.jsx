@@ -293,13 +293,128 @@ export const DataProvider = ({ children }) => {
     const totalExpense = data.transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
     const totalSavings = totalIncome - totalExpense;
 
+    // Auto-sync Goal progress based on totalSavings
+    useEffect(() => {
+        if (isLoading) return;
+
+        let needsUpdate = false;
+        let newGoals = [...data.goals];
+        let currentSavings = totalSavings > 0 ? totalSavings : 0;
+
+        // Sort by target date ascending
+        const sortedIndices = newGoals.map((g, i) => i).sort((a, b) => new Date(newGoals[a].targetDate) - new Date(newGoals[b].targetDate));
+        
+        sortedIndices.forEach(idx => {
+            const goal = newGoals[idx];
+            const allocation = Math.min(currentSavings, goal.targetAmount);
+            currentSavings -= allocation;
+            if (goal.currentAmount !== allocation) {
+                needsUpdate = true;
+                newGoals[idx] = { ...goal, currentAmount: allocation };
+            }
+        });
+
+        if (needsUpdate) {
+            setData(prev => ({ ...prev, goals: newGoals }));
+            const token = localStorage.getItem('sb-token');
+            if (SUPABASE_URL && SUPABASE_KEY && token) {
+                newGoals.forEach(async (goal) => {
+                    try {
+                        await supabaseFetch(`goals?id=eq.${goal.id}`, {
+                            method: 'PATCH',
+                            headers: { 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ current_amount: goal.currentAmount })
+                        });
+                    } catch (err) { console.error('Auto update goal failed', err); }
+                });
+            }
+        }
+    }, [totalSavings, data.goals, isLoading]);
+
+    // Generate notifications for budget limits
+    useEffect(() => {
+        if (isLoading || !data.user) return;
+
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
+        const monthlyTx = data.transactions.filter(t => {
+            const d = new Date(t.date || t.created_at);
+            return d.getMonth() === currentMonth && d.getFullYear() === currentYear && t.type === 'expense';
+        });
+
+        let newNotifications = [];
+
+        // Overall Monthly Limit
+        const limit = data.user.monthlySpendingLimit;
+        if (limit > 0) {
+            const currentMonthExpense = monthlyTx.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+            if (currentMonthExpense > limit) {
+                newNotifications.push({
+                    id: `limit-${currentMonth}-${currentYear}`,
+                    title: 'Monthly Limit Exceeded',
+                    message: `You have spent $${currentMonthExpense.toLocaleString()} which exceeds your limit of $${limit.toLocaleString()}.`,
+                    type: 'alert',
+                    date: new Date().toISOString(),
+                    read: false
+                });
+            } else if (currentMonthExpense > limit * 0.9) {
+                 newNotifications.push({
+                    id: `limit-warn-${currentMonth}-${currentYear}`,
+                    title: 'Nearing Monthly Limit',
+                    message: `You have spent $${currentMonthExpense.toLocaleString()} (over 90% of your $${limit.toLocaleString()} limit).`,
+                    type: 'warning',
+                    date: new Date().toISOString(),
+                    read: false
+                });
+            }
+        }
+
+        // Category Budgets
+        const categoryBudget = data.user.categoryBudget || {};
+        const expensesByCategory = monthlyTx.reduce((acc, t) => {
+            acc[t.category] = (acc[t.category] || 0) + (Number(t.amount) || 0);
+            return acc;
+        }, {});
+
+        Object.keys(categoryBudget).forEach(cat => {
+            const catLimit = categoryBudget[cat];
+            if (catLimit > 0) {
+                const catSpent = expensesByCategory[cat] || 0;
+                if (catSpent > catLimit) {
+                    newNotifications.push({
+                        id: `cat-${cat}-${currentMonth}-${currentYear}`,
+                        title: `Budget Exceeded: ${cat}`,
+                        message: `You spent $${catSpent.toLocaleString()} on ${cat}, exceeding your $${catLimit.toLocaleString()} budget.`,
+                        type: 'alert',
+                        date: new Date().toISOString(),
+                        read: false
+                    });
+                }
+            }
+        });
+
+        if (newNotifications.length > 0) {
+            setData(prev => {
+                const existingIds = prev.notifications.map(n => n.id);
+                const toAdd = newNotifications.filter(n => !existingIds.includes(n.id));
+                if (toAdd.length > 0) {
+                    return { ...prev, notifications: [...toAdd, ...prev.notifications] };
+                }
+                return prev;
+            });
+        }
+    }, [data.transactions, data.user.monthlySpendingLimit, data.user.categoryBudget, isLoading]);
+
     return (
         <DataContext.Provider value={{
             data, isLoading,
             addTransaction, deleteTransaction,
             addGoal, updateGoal, deleteGoal,
             updateUser, resetData, logout,
-            totalIncome, totalExpense, totalSavings
+            totalIncome, totalExpense, totalSavings,
+            markNotificationRead, clearAllNotifications
         }}>
             {children}
         </DataContext.Provider>
