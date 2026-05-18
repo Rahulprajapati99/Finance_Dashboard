@@ -74,6 +74,17 @@ export const DataProvider = ({ children }) => {
 
     useEffect(() => {
         const init = async () => {
+            // Check for access token in URL hash (from Supabase OAuth redirect)
+            if (window.location.hash) {
+                const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                const accessToken = hashParams.get('access_token');
+                if (accessToken) {
+                    localStorage.setItem('sb-token', accessToken);
+                    // Clean URL
+                    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+                }
+            }
+
             const token = localStorage.getItem('sb-token');
             const saved = localStorage.getItem('finance_db');
 
@@ -125,6 +136,26 @@ export const DataProvider = ({ children }) => {
                         }))
                     }));
                 } catch (e) { console.error('Supabase init failed:', e); }
+            } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                // Local testing bypass: use mock data instead of requiring Supabase login
+                console.warn("Running locally: Bypassing Supabase login and using mock data.");
+                setData(prev => ({
+                    ...prev,
+                    user: {
+                        ...prev.user,
+                        name: 'Local Tester',
+                        email: 'tester@local.dev',
+                        monthlySpendingLimit: 5000,
+                        categoryBudget: {
+                            'Food & Grocery': 800,
+                            'Transport': 300,
+                            'Bills & Utilities': 400,
+                            'Entertainment': 200,
+                            'Healthcare': 100,
+                            'Others': 100
+                        }
+                    }
+                }));
             }
             setIsLoading(false);
         };
