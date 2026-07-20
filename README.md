@@ -13,6 +13,7 @@
   <img src="https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite 5"/>
   <img src="https://img.shields.io/badge/Chart.js-4-FF6384?style=flat-square&logo=chartdotjs&logoColor=white" alt="Chart.js"/>
   <img src="https://img.shields.io/badge/Deployed-Vercel-000000?style=flat-square&logo=vercel&logoColor=white" alt="Vercel"/>
+  <a href="https://github.com/Rahulprajapati99/Finance_Dashboard/actions/workflows/e2e.yml"><img src="https://github.com/Rahulprajapati99/Finance_Dashboard/actions/workflows/e2e.yml/badge.svg" alt="E2E Tests"/></a>
 </p>
 
 ---
@@ -69,6 +70,23 @@ src/
                  # Notifications, Settings
   styles/        # Global CSS (CSS-variable theming)
 ```
+
+## 🧪 Quality — Playwright E2E Suite
+
+The app ships with an automated end-to-end test suite (23 tests) that runs in CI on every push and pull request:
+
+- **Architecture** — Page Object Model (`e2e/pages/`), custom fixtures with deterministic localStorage seeding (`e2e/fixtures/`), zero shared state between tests
+- **Functional** — navigation smoke across all routes, transaction creation (income & expense), search, type filters, and combined search+filter semantics
+- **Negative & boundary** — zero/negative amounts, whitespace-only input that bypasses HTML `required`, exact 100/101-character name boundaries
+- **Security-adjacent** — verifies HTML injection in user input is sanitized before render
+- **Persistence** — local-first storage survives full page reloads
+
+```bash
+npm run test:e2e        # headless run
+npm run test:e2e:ui     # interactive UI mode
+```
+
+CI: [`.github/workflows/e2e.yml`](.github/workflows/e2e.yml) — Chromium on Ubuntu, HTML report uploaded on failure.
 
 ## 👤 Author
 
