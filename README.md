@@ -74,4 +74,4 @@ src/
 
 **Rahul Prajapati** — QA Engineer × AI Builder
 
-📫 rahulbdo65@gmail.com · 🌐 [rahulprajapati99.vercel.app](https://rahulprajapati99.vercel.app) · 🐙 [@Rahulprajapati99](https://github.com/Rahulprajapati99)
+📫 rahul.connectX@gmail.com · 💼 [linkedin.com/in/rahul-prajapati](https://www.linkedin.com/in/rahul-prajapati) · 🌐 [rahulprajapati99.vercel.app](https://rahulprajapati99.vercel.app) · 🐙 [@Rahulprajapati99](https://github.com/Rahulprajapati99)
