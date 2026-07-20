@@ -1,43 +1,77 @@
-# RP Solutionss Personal Finance Dashboard
+<h1 align="center">💰 Personal Finance Dashboard</h1>
 
-A comprehensive, local-first personal finance dashboard built with React and Vite.
+<p align="center">
+  A local-first personal finance app — track income, expenses, goals and analytics entirely in your browser. No account, no backend, your data never leaves your machine.
+</p>
 
-## Prerequisites
+<p align="center">
+  <a href="https://finance-dashboard-nu-nine.vercel.app"><b>▶ Live Demo</b></a>
+</p>
 
-- **Node.js** (v18 or higher) must be installed on your machine.
-- **npm** (comes with Node.js).
+<p align="center">
+  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 18"/>
+  <img src="https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite 5"/>
+  <img src="https://img.shields.io/badge/Chart.js-4-FF6384?style=flat-square&logo=chartdotjs&logoColor=white" alt="Chart.js"/>
+  <img src="https://img.shields.io/badge/Deployed-Vercel-000000?style=flat-square&logo=vercel&logoColor=white" alt="Vercel"/>
+</p>
 
-> **Note:** The project was initialized in an environment where Node.js was not detected. Please ensure you have Node.js installed to run the application.
+---
 
-## Setup Instructions
+## ✨ Features
 
-1. **Install Dependencies**
-   Open your terminal in the project directory (`d:\Projects\Finance Dashboard`) and run:
-   ```bash
-   npm install
-   ```
+- **📊 Dashboard** — at-a-glance balance, income, expenses and savings with interactive Chart.js visualizations
+- **💸 Transactions** — add, search and filter every financial activity
+- **🎯 Goals** — set financial targets and track progress toward them
+- **📈 Analytics** — detailed breakdown of spending habits by category and time
+- **📄 Reports** — export your data as **PDF** (jsPDF) and work with **CSV** (PapaParse)
+- **🔔 Notifications & ⚙️ Settings** — alerts and personalization, including theming via CSS variables
+- **🔒 Local-first** — all data persists in browser localStorage; no external database, no sign-up, fully private
 
-2. **Run Development Server**
-   Start the local server:
-   ```bash
-   npm run dev
-   ```
+## 🧱 Built With
 
-3. **Open in Browser**
-   Click the link shown in the terminal (usually `http://localhost:5173`) to view the dashboard.
+| Layer | Tech |
+|---|---|
+| UI | React 18, React Router 6, Lucide icons |
+| Charts | Chart.js 4 + react-chartjs-2 |
+| Data | localStorage via React Context (`DataContext`), UUID keys |
+| Export | jsPDF + autotable (PDF), PapaParse (CSV) |
+| Tooling | Vite 5, ESLint |
+| Hosting | Vercel |
 
-## Features
+Built AI-first with **Antigravity**, then reviewed, hardened and tested by hand — including an `ErrorBoundary` around the app shell so a single failing view can't take down the dashboard.
 
-- **Dashboard**: Overview of balance, income, expenses, and savings with interactive charts.
-- **Transactions**: Searchable and filterable list of all financial activities.
-- **Wallet**: Visual management of credit/debit cards.
-- **Goals**: Track progress towards financial targets.
-- **Analytics**: Detailed breakdown of spending habits.
-- **Local Storage**: All data is persisted locally in your browser – no external database required.
+## 🚀 Getting Started
 
-## Technologies
+Requires **Node.js 18+**.
 
-- React + Vite
-- Chart.js (Visualizations)
-- Lucide React (Icons)
-- CSS Variables (Theming based on RP Solutionss brand guidelines)
+```bash
+git clone https://github.com/Rahulprajapati99/Finance_Dashboard.git
+cd Finance_Dashboard
+npm install
+npm run dev      # local dev server → http://localhost:5173
+```
+
+Other scripts:
+
+```bash
+npm run build    # production build
+npm run preview  # preview the production build
+npm run lint     # ESLint
+```
+
+## 🗂️ Project Structure
+
+```
+src/
+  components/    # Layout, Header, Sidebar, modals, ErrorBoundary
+  context/       # DataContext (localStorage persistence), ThemeContext
+  pages/         # Dashboard, Transactions, Goals, Analytics, Reports,
+                 # Notifications, Settings
+  styles/        # Global CSS (CSS-variable theming)
+```
+
+## 👤 Author
+
+**Rahul Prajapati** — QA Engineer × AI Builder
+
+📫 rahulbdo65@gmail.com · 🌐 [rahulprajapati99.vercel.app](https://rahulprajapati99.vercel.app) · 🐙 [@Rahulprajapati99](https://github.com/Rahulprajapati99)
