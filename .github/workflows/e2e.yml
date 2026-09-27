@@ -1,4 +1,4 @@
-name: E2E Tests
+name: CI & E2E Tests
 
 on:
   push:
@@ -7,8 +7,33 @@ on:
     branches: [main]
 
 jobs:
+  nextjs-build:
+    name: Next.js Production Build (Vercel Target)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: finance-dashboard
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: finance-dashboard/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js app
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://sqimalbsjyatkbbdlcez.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.placeholder' }}
+
   playwright:
-    name: Playwright (Chromium)
+    name: Playwright (Chromium) - Vite E2E
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
